@@ -89,20 +89,20 @@ In the future, we plan to introduce a Premium subscription designed for users wh
 ### 2) Install dependencies
 ```bash
 npm install
+```
 
-Run
-
-Run dev server
-bash
+### 3) Run dev server
+```bash
 npm run dev
+```
+
 Open:
+- http://localhost:3000
 
-http://localhost:3000
-Scripts
-Common scripts (may vary by package manager):
-
-bash
+### Scripts
+```bash
 npm run dev       # Start dev server
 npm run build     # Production build
 npm run start     # Start production server
 npm run lint      # Lint
+```
