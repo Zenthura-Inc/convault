@@ -1,3 +1,5 @@
+import { ConverterCard } from "@/components/converter-card";
+
 export default function Home() {
   return (
     <div className="space-y-16">
@@ -57,46 +59,8 @@ export default function Home() {
         </div>
 
         <div className="mx-auto w-full max-w-3xl rounded-3xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
-          <div className="space-y-4 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900/30">
-            <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
-              <div className="flex items-center justify-between gap-4 text-xs text-zinc-600 dark:text-zinc-300">
-                <span>0/2 conversions total (Guest)</span>
-                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                  Free
-                </span>
-              </div>
-              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10">
-                <div className="h-full w-[40%] rounded-full bg-indigo-600" />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-indigo-200/70 bg-indigo-50 p-4 text-sm text-indigo-900 dark:border-indigo-400/20 dark:bg-indigo-950/30 dark:text-indigo-100">
-              Premium features are not yet implemented. All core tools are free
-              while we continue improving the platform.
-            </div>
-
-            <div className="rounded-2xl border border-dashed border-black/15 bg-white p-6 text-center dark:border-white/15 dark:bg-zinc-950">
-              <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700 shadow-sm dark:bg-indigo-950/40 dark:text-indigo-200">
-                  ↑
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">Upload your files</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-300">
-                    Drag and drop files here, or click to browse.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 active:scale-[0.98]"
-                >
-                  Choose a file
-                </button>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Mobile-friendly: file picker recommended on iOS/Android.
-                </p>
-              </div>
-            </div>
+          <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900/30">
+            <ConverterCard />
           </div>
         </div>
       </section>
