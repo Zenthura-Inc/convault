@@ -13,8 +13,10 @@ export function ThemeProvider({
       attribute="class"
       defaultTheme="system"
       enableSystem
-      enableColorScheme={false}
+      enableColorScheme
       disableTransitionOnChange
+      storageKey="convault-theme"
+      themes={["light", "dark", "system"]}
     >
       {children}
     </NextThemesProvider>
