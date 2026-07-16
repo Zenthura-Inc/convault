@@ -46,9 +46,9 @@ const testimonials = [
 export default function Home() {
   return (
     <div className="space-y-14 sm:space-y-16">
-      <section className="overflow-hidden rounded-3xl border border-purple-800 bg-purple-700 px-6 py-12 text-white shadow-sm sm:px-10 sm:py-16">
+      <section className="overflow-hidden rounded-[1.35rem] border border-purple-950/25 bg-[var(--brand)] px-6 py-12 text-white shadow-[0_10px_24px_rgb(15_23_42/0.08)] sm:px-10 sm:py-16">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mx-auto inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-purple-50">
+          <div className="mx-auto inline-flex items-center rounded-lg border border-white/15 bg-black/10 px-4 py-1.5 text-xs font-semibold text-purple-50">
             Trusted flow: Upload - Convert - Download
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -63,13 +63,13 @@ export default function Home() {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#converter"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] sm:w-auto"
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] sm:w-auto"
             >
               Start Converting Now
             </a>
             <a
               href="/privacy"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full border border-white/30 bg-purple-800 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-900 active:scale-[0.98] sm:w-auto"
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/15 bg-black/10 px-6 text-sm font-semibold text-white transition hover:bg-black/15 active:scale-[0.98] sm:w-auto"
             >
               Privacy & Security
             </a>
@@ -79,7 +79,7 @@ export default function Home() {
               (item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3"
+                  className="rounded-xl border border-white/10 bg-black/10 px-4 py-3"
                 >
                   {item}
                 </div>
@@ -99,8 +99,8 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mx-auto w-full max-w-3xl rounded-3xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
-          <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900/50">
+        <div className="mx-auto w-full max-w-3xl rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface)] p-3 shadow-[var(--shadow-soft)] sm:p-4">
+          <div className="rounded-2xl bg-[var(--surface-muted)] p-3 sm:p-4">
             <ConverterCard />
           </div>
         </div>
@@ -120,14 +120,14 @@ export default function Home() {
           {formatGroups.map((group) => (
             <article
               key={group.title}
-              className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition hover:border-purple-200 dark:border-white/10 dark:bg-zinc-950 dark:hover:border-purple-500/40"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-5 shadow-[var(--shadow-soft)] transition hover:border-[var(--border-strong)]"
             >
               <p className="text-sm font-semibold">{group.title}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {group.formats.map((format) => (
                   <span
                     key={format}
-                    className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-800 dark:border-purple-500/30 dark:bg-purple-950/40 dark:text-purple-100"
+                    className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200"
                   >
                     {format}
                   </span>
@@ -152,9 +152,9 @@ export default function Home() {
           {benefits.map((benefit) => (
             <article
               key={benefit.title}
-              className="rounded-2xl border border-black/10 bg-white p-6 text-center shadow-sm dark:border-white/10 dark:bg-zinc-950"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 text-center shadow-[var(--shadow-soft)]"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-sm font-bold text-purple-700 dark:bg-purple-950/50 dark:text-purple-200">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-sm font-bold text-[var(--brand)]">
                 {benefit.icon}
               </div>
               <h3 className="mt-4 text-sm font-semibold">{benefit.title}</h3>
@@ -180,7 +180,7 @@ export default function Home() {
           {testimonials.map((testimonial) => (
             <article
               key={testimonial.name}
-              className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-950"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]"
             >
               <p className="text-sm leading-7 text-zinc-700 dark:text-zinc-200">
                 &ldquo;{testimonial.quote}&rdquo;
@@ -194,7 +194,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-purple-800 bg-purple-700 p-8 text-center text-white shadow-sm sm:p-10">
+      <section className="rounded-[1.35rem] border border-purple-950/25 bg-[var(--brand)] p-8 text-center text-white shadow-[0_8px_20px_rgb(15_23_42/0.08)] sm:p-10">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           Ready to Convert?
         </h2>
@@ -205,13 +205,13 @@ export default function Home() {
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#converter"
-            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] sm:w-auto"
+            className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] sm:w-auto"
           >
             Get Started Free
           </a>
           <a
             href="/privacy"
-            className="inline-flex h-12 w-full items-center justify-center rounded-full border border-white/30 bg-purple-800 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-900 active:scale-[0.98] sm:w-auto"
+            className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-white/15 bg-black/10 px-6 text-sm font-semibold text-white transition hover:bg-black/15 active:scale-[0.98] sm:w-auto"
           >
             Privacy & Security
           </a>

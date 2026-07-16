@@ -203,10 +203,10 @@ export function ConverterCard() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
         <div className="flex items-center justify-between gap-4 text-xs text-zinc-600 dark:text-zinc-300">
           <span>Single file - Max {formatBytes(MAX_BYTES)} (Phase 1)</span>
-          <span className="font-semibold text-purple-700 dark:text-purple-300">
+          <span className="font-semibold text-[var(--brand)]">
             Free
           </span>
         </div>
@@ -219,17 +219,17 @@ export function ConverterCard() {
           aria-label="Conversion progress"
         >
           <div
-            className="h-full rounded-full bg-purple-700 transition-[width]"
+            className="h-full rounded-full bg-[var(--brand)] transition-[width]"
             style={{ width: `${progressValue}%` }}
           />
         </div>
       </div>
 
       <div
-        className={`rounded-2xl border border-dashed p-6 text-center transition ${
+        className={`rounded-3xl border border-dashed p-6 text-center transition sm:p-7 ${
           dragActive
-            ? "border-purple-500 bg-purple-50 dark:bg-purple-950/30"
-            : "border-black/15 bg-white dark:border-white/15 dark:bg-zinc-950"
+            ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+            : "border-[var(--border-strong)] bg-[var(--surface)] hover:border-[var(--brand)]/60"
         }`}
         onDragEnter={(event) => {
           event.preventDefault();
@@ -255,7 +255,7 @@ export function ConverterCard() {
         }}
       >
         <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-lg font-semibold text-purple-700 shadow-sm dark:bg-purple-950/50 dark:text-purple-200">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-soft)] text-lg font-semibold text-[var(--brand)]">
             +
           </div>
           <div className="space-y-1">
@@ -275,7 +275,7 @@ export function ConverterCard() {
 
           <button
             type="button"
-            className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => inputRef.current?.click()}
             disabled={isConverting}
           >
@@ -297,7 +297,7 @@ export function ConverterCard() {
       </div>
 
       {file ? (
-        <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -309,7 +309,7 @@ export function ConverterCard() {
             </div>
             <button
               type="button"
-              className="inline-flex h-10 items-center justify-center rounded-full border border-purple-200 bg-white px-4 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-purple-500/30 dark:bg-zinc-950 dark:text-purple-200 dark:hover:bg-purple-950/30"
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--brand)] transition hover:bg-[var(--surface-muted)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               onClick={() => resetAll()}
               disabled={isConverting}
             >
@@ -323,7 +323,7 @@ export function ConverterCard() {
                 Output format
               </span>
               <select
-                className="mt-2 h-11 w-full rounded-2xl border border-black/10 bg-white px-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
+                className="mt-2 h-11 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] px-3 text-sm font-semibold text-zinc-900 outline-none transition hover:border-[var(--border-strong)] focus:border-[var(--brand)] focus:ring-2 focus:ring-purple-500/20 dark:text-zinc-100"
                 value={outputFormat}
                 onChange={(event) => setOutputFormat(event.target.value)}
                 disabled={isConverting || formats.length === 0}
@@ -341,14 +341,14 @@ export function ConverterCard() {
                 <a
                   href={downloadUrl}
                   download={downloadName}
-                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98]"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
                 >
                   Download
                 </a>
               ) : (
                 <button
                   type="button"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={startConvert}
                   disabled={!canConvert || step !== "selected" || isConverting}
                 >
@@ -362,7 +362,7 @@ export function ConverterCard() {
             <div className="mt-4">
               <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10">
                 <div
-                  className="h-full rounded-full bg-purple-700 transition-[width]"
+                  className="h-full rounded-full bg-[var(--brand)] transition-[width]"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -380,7 +380,7 @@ export function ConverterCard() {
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900 dark:border-purple-500/30 dark:bg-purple-950/30 dark:text-purple-100">
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-4 text-sm text-zinc-700 dark:text-zinc-200">
         Premium features are not yet implemented. For now, all core tools remain
         free while we continue improving the platform.
       </div>

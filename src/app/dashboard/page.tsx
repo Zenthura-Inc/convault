@@ -13,7 +13,7 @@ export default function DashboardPage() {
         </p>
       </section>
 
-      <section className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-950">
+      <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]">
         <h2 className="text-base font-semibold">Your conversions</h2>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
           This will show your conversion history once authentication is added.
@@ -22,13 +22,13 @@ export default function DashboardPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98]"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
           >
             Convert a file
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-purple-200 bg-white px-5 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] dark:border-purple-500/30 dark:bg-zinc-950 dark:text-purple-200 dark:hover:bg-purple-950/30"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] px-5 text-sm font-semibold text-[var(--brand)] transition hover:bg-[var(--surface-muted)] active:scale-[0.98]"
           >
             See plans
           </Link>

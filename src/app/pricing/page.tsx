@@ -12,7 +12,7 @@ export default function PricingPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-950">
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold">Free</h2>
@@ -21,7 +21,7 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-semibold text-purple-700 dark:text-purple-300">
+              <p className="text-2xl font-semibold text-[var(--brand)]">
                 $0
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">forever</p>
@@ -35,17 +35,17 @@ export default function PricingPage() {
           <div className="mt-6">
             <button
               type="button"
-              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98]"
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
             >
               Get Started
             </button>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-950">
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-800 dark:border-purple-500/30 dark:bg-purple-950/40 dark:text-purple-100">
+              <div className="inline-flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200">
                 Coming Soon
               </div>
               <h2 className="mt-3 text-lg font-semibold">Premium</h2>
@@ -73,7 +73,7 @@ export default function PricingPage() {
             <button
               type="button"
               disabled
-              className="inline-flex h-11 w-full cursor-not-allowed items-center justify-center rounded-full border border-black/10 bg-zinc-50 px-5 text-sm font-semibold text-zinc-400 shadow-sm dark:border-white/10 dark:bg-zinc-900"
+              className="inline-flex h-11 w-full cursor-not-allowed items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-5 text-sm font-semibold text-zinc-400"
             >
               Premium (Coming Soon)
             </button>
@@ -81,7 +81,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-black/10 bg-white p-6 text-sm leading-7 text-zinc-700 shadow-sm dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-200">
+      <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 text-sm leading-7 text-zinc-700 shadow-[var(--shadow-soft)] dark:text-zinc-200">
         <p>
           We&apos;re currently focused on delivering a fast, simple, and reliable
           file conversion experience for everyone - completely free.
