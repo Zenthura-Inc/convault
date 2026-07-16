@@ -22,13 +22,13 @@ export default function DashboardPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-zinc-900 px-5 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] dark:bg-white dark:text-black"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98]"
           >
             Convert a file
           </Link>
           <Link
             href="/pricing"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-black/10 bg-white px-5 text-sm font-semibold text-zinc-900 shadow-sm transition active:scale-[0.98] dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-purple-200 bg-white px-5 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] dark:border-purple-500/30 dark:bg-zinc-950 dark:text-purple-200 dark:hover:bg-purple-950/30"
           >
             See plans
           </Link>

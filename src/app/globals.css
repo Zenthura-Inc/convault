@@ -30,6 +30,11 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+:focus-visible {
+  outline: 3px solid rgb(147 51 234 / 0.35);
+  outline-offset: 3px;
+}
+
 :root {
   --safe-area-inset-top: env(safe-area-inset-top);
   --safe-area-inset-right: env(safe-area-inset-right);

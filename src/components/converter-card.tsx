@@ -3,7 +3,6 @@
 import * as React from "react";
 
 type FileCategory = "image" | "document" | "audio" | "video" | "unknown";
-
 type Step = "idle" | "selected" | "converting" | "ready";
 
 type FormatOption = {
@@ -14,13 +13,15 @@ type FormatOption = {
 const MAX_BYTES = 25 * 1024 * 1024;
 
 function formatBytes(bytes: number) {
-  const units = ["B", "KB", "MB", "GB"]; 
+  const units = ["B", "KB", "MB", "GB"];
   let value = bytes;
   let unitIndex = 0;
+
   while (value >= 1024 && unitIndex < units.length - 1) {
     value /= 1024;
     unitIndex += 1;
   }
+
   return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
@@ -76,18 +77,27 @@ function isAllowedFile(file: File) {
   return true;
 }
 
+function sanitizeDownloadBaseName(name: string) {
+  return (
+    name
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^\w.-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "converted-file"
+  );
+}
+
 export function ConverterCard() {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
-
   const [step, setStep] = React.useState<Step>("idle");
   const [file, setFile] = React.useState<File | null>(null);
   const [category, setCategory] = React.useState<FileCategory>("unknown");
-  const [outputFormat, setOutputFormat] = React.useState<string>("");
-  const [error, setError] = React.useState<string>("");
-  const [progress, setProgress] = React.useState<number>(0);
-  const [downloadUrl, setDownloadUrl] = React.useState<string>("");
-  const [downloadName, setDownloadName] = React.useState<string>("");
+  const [outputFormat, setOutputFormat] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [progress, setProgress] = React.useState(0);
+  const [downloadUrl, setDownloadUrl] = React.useState("");
+  const [downloadName, setDownloadName] = React.useState("");
 
   React.useEffect(() => {
     return () => {
@@ -97,17 +107,21 @@ export function ConverterCard() {
 
   const formats = React.useMemo(() => getAllowedFormats(category), [category]);
 
-  function resetAll() {
+  function resetAll(options: { preserveError?: boolean } = {}) {
     setStep("idle");
     setFile(null);
     setCategory("unknown");
     setOutputFormat("");
-    setError("");
+    if (!options.preserveError) setError("");
     setProgress(0);
+
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl("");
     setDownloadName("");
-    if (inputRef.current) inputRef.current.value = "";
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   }
 
   function applyFile(next: File) {
@@ -115,20 +129,21 @@ export function ConverterCard() {
 
     if (!isAllowedFile(next)) {
       const tooBig = next.size > MAX_BYTES;
-      if (tooBig) {
-        setError(`File is too large. Max size is ${formatBytes(MAX_BYTES)}.`);
-      } else {
-        setError("Unsupported file type. Please upload an image, document, audio, or video file.");
-      }
-      resetAll();
+      setError(
+        tooBig
+          ? `File is too large. Max size is ${formatBytes(MAX_BYTES)}.`
+          : "Unsupported file type. Please upload an image, document, audio, or video file.",
+      );
+      resetAll({ preserveError: true });
       return;
     }
 
     const nextCategory = getFileCategory(next);
+    const nextFormats = getAllowedFormats(nextCategory);
+
     setFile(next);
     setCategory(nextCategory);
     setStep("selected");
-    const nextFormats = getAllowedFormats(nextCategory);
     setOutputFormat(nextFormats[0]?.value ?? "");
 
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -137,10 +152,9 @@ export function ConverterCard() {
     setProgress(0);
   }
 
-  function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const picked = e.target.files?.[0];
-    if (!picked) return;
-    applyFile(picked);
+  function onPickFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const picked = event.target.files?.[0];
+    if (picked) applyFile(picked);
   }
 
   function startConvert() {
@@ -148,6 +162,7 @@ export function ConverterCard() {
       setError("Please upload a file first.");
       return;
     }
+
     if (!outputFormat) {
       setError("Please select an output format.");
       return;
@@ -157,14 +172,15 @@ export function ConverterCard() {
     setStep("converting");
     setProgress(0);
 
-    let p = 0;
+    let nextProgress = 0;
     const interval = window.setInterval(() => {
-      p += Math.max(3, Math.round(Math.random() * 10));
-      if (p >= 100) {
+      nextProgress += Math.max(3, Math.round(Math.random() * 10));
+
+      if (nextProgress >= 100) {
         window.clearInterval(interval);
         setProgress(100);
 
-        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        const baseName = sanitizeDownloadBaseName(file.name);
         const name = `${baseName}.${outputFormat}`;
         const content = `Convault mock conversion\n\nInput: ${file.name}\nOutput: ${name}\n\nThis is a placeholder file for Phase 1 UI.`;
         const blob = new Blob([content], { type: "text/plain" });
@@ -175,26 +191,36 @@ export function ConverterCard() {
         setStep("ready");
         return;
       }
-      setProgress(p);
+
+      setProgress(nextProgress);
     }, 250);
   }
 
   const isConverting = step === "converting";
-  const canConvert = !!file && !!outputFormat;
+  const canConvert = Boolean(file && outputFormat);
+  const progressValue =
+    step === "ready" ? 100 : step === "converting" ? progress : file ? 35 : 10;
 
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
         <div className="flex items-center justify-between gap-4 text-xs text-zinc-600 dark:text-zinc-300">
-          <span>Single file • Max {formatBytes(MAX_BYTES)} (Phase 1)</span>
-          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+          <span>Single file - Max {formatBytes(MAX_BYTES)} (Phase 1)</span>
+          <span className="font-semibold text-purple-700 dark:text-purple-300">
             Free
           </span>
         </div>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10">
+        <div
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressValue}
+          aria-label="Conversion progress"
+        >
           <div
-            className="h-full rounded-full bg-indigo-600 transition-[width]"
-            style={{ width: `${step === "ready" ? 100 : step === "converting" ? progress : file ? 35 : 10}%` }}
+            className="h-full rounded-full bg-purple-700 transition-[width]"
+            style={{ width: `${progressValue}%` }}
           />
         </div>
       </div>
@@ -202,40 +228,39 @@ export function ConverterCard() {
       <div
         className={`rounded-2xl border border-dashed p-6 text-center transition ${
           dragActive
-            ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/20"
+            ? "border-purple-500 bg-purple-50 dark:bg-purple-950/30"
             : "border-black/15 bg-white dark:border-white/15 dark:bg-zinc-950"
         }`}
-        onDragEnter={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onDragEnter={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
           setDragActive(true);
         }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
           setDragActive(true);
         }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onDragLeave={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
           setDragActive(false);
         }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onDrop={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
           setDragActive(false);
-          const dropped = e.dataTransfer.files?.[0];
-          if (!dropped) return;
-          applyFile(dropped);
+          const dropped = event.dataTransfer.files?.[0];
+          if (dropped) applyFile(dropped);
         }}
       >
         <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700 shadow-sm dark:bg-indigo-950/40 dark:text-indigo-200">
-            ↑
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-lg font-semibold text-purple-700 shadow-sm dark:bg-purple-950/50 dark:text-purple-200">
+            +
           </div>
           <div className="space-y-1">
             <p className="text-sm font-semibold">Upload your file</p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
               Drag & drop on desktop, or use file picker on mobile.
             </p>
           </div>
@@ -243,47 +268,50 @@ export function ConverterCard() {
           <input
             ref={inputRef}
             type="file"
-            className="hidden"
+            className="sr-only"
             onChange={onPickFile}
+            aria-describedby="supported-file-types"
           />
 
           <button
             type="button"
-            className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 active:scale-[0.98]"
+            className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => inputRef.current?.click()}
-            disabled={step === "converting"}
+            disabled={isConverting}
           >
             Choose a file
           </button>
 
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p id="supported-file-types" className="text-xs text-zinc-500 dark:text-zinc-400">
             Supported: images, documents, audio, video
           </p>
         </div>
       </div>
 
-      {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
-          {error}
-        </div>
-      ) : null}
+      <div aria-live="polite">
+        {error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
+            {error}
+          </div>
+        ) : null}
+      </div>
 
       {file ? (
         <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-zinc-950">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                 {file.name}
               </p>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                {formatBytes(file.size)} • {category}
+                {formatBytes(file.size)} - {category}
               </p>
             </div>
             <button
               type="button"
-              className="inline-flex h-10 items-center justify-center rounded-full border border-black/10 bg-white px-4 text-sm font-semibold text-zinc-900 shadow-sm transition active:scale-[0.98] dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
-              onClick={resetAll}
-              disabled={step === "converting"}
+              className="inline-flex h-10 items-center justify-center rounded-full border border-purple-200 bg-white px-4 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-purple-500/30 dark:bg-zinc-950 dark:text-purple-200 dark:hover:bg-purple-950/30"
+              onClick={() => resetAll()}
+              disabled={isConverting}
             >
               Remove
             </button>
@@ -295,14 +323,14 @@ export function ConverterCard() {
                 Output format
               </span>
               <select
-                className="mt-2 h-11 w-full rounded-2xl border border-black/10 bg-white px-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-indigo-400 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
+                className="mt-2 h-11 w-full rounded-2xl border border-black/10 bg-white px-3 text-sm font-semibold text-zinc-900 shadow-sm outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-100"
                 value={outputFormat}
-                onChange={(e) => setOutputFormat(e.target.value)}
+                onChange={(event) => setOutputFormat(event.target.value)}
                 disabled={isConverting || formats.length === 0}
               >
-                {formats.map((f) => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
+                {formats.map((format) => (
+                  <option key={format.value} value={format.value}>
+                    {format.label}
                   </option>
                 ))}
               </select>
@@ -313,46 +341,46 @@ export function ConverterCard() {
                 <a
                   href={downloadUrl}
                   download={downloadName}
-                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 active:scale-[0.98]"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98]"
                 >
                   Download
                 </a>
               ) : (
                 <button
                   type="button"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-purple-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={startConvert}
                   disabled={!canConvert || step !== "selected" || isConverting}
                 >
-                  {step === "converting" ? `Converting… ${progress}%` : "Convert"}
+                  {isConverting ? `Converting... ${progress}%` : "Convert"}
                 </button>
               )}
             </div>
           </div>
 
-          {step === "converting" ? (
+          {isConverting ? (
             <div className="mt-4">
               <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10">
                 <div
-                  className="h-full rounded-full bg-indigo-600 transition-[width]"
+                  className="h-full rounded-full bg-purple-700 transition-[width]"
                   style={{ width: `${progress}%` }}
                 />
               </div>
               <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
-                Uploading → Converting → Preparing download
+                Uploading - Converting - Preparing download
               </p>
             </div>
           ) : null}
 
           {step === "ready" ? (
-            <div className="mt-4 rounded-2xl border border-indigo-200/70 bg-indigo-50 p-4 text-sm text-indigo-900 dark:border-indigo-400/20 dark:bg-indigo-950/30 dark:text-indigo-100">
+            <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-500/30 dark:bg-green-950/30 dark:text-green-100">
               Conversion complete. Your download is ready.
             </div>
           ) : null}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-indigo-200/70 bg-indigo-50 p-4 text-sm text-indigo-900 dark:border-indigo-400/20 dark:bg-indigo-950/30 dark:text-indigo-100">
+      <div className="rounded-2xl border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900 dark:border-purple-500/30 dark:bg-purple-950/30 dark:text-purple-100">
         Premium features are not yet implemented. For now, all core tools remain
         free while we continue improving the platform.
       </div>
