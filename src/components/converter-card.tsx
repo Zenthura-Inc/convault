@@ -157,7 +157,7 @@ export function ConverterCard() {
     if (picked) applyFile(picked);
   }
 
-  function startConvert() {
+  async function startConvert() {
     if (!file) {
       setError("Please upload a file first.");
       return;
@@ -170,9 +170,42 @@ export function ConverterCard() {
 
     setError("");
     setStep("converting");
-    setProgress(0);
+    setProgress(8);
 
-    let nextProgress = 0;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("outputFormat", outputFormat);
+
+    let validationPayload: {
+      ok?: boolean;
+      error?: { message?: string };
+    } | null = null;
+
+    try {
+      const validationResponse = await fetch("/api/uploads/validate", {
+        method: "POST",
+        body: form,
+      });
+
+      validationPayload = await validationResponse.json().catch(() => null);
+
+      if (!validationResponse.ok || validationPayload?.ok !== true) {
+        setStep("selected");
+        setProgress(35);
+        setError(
+          validationPayload?.error?.message ??
+            "File could not be validated. Please try another file.",
+        );
+        return;
+      }
+    } catch {
+      setStep("selected");
+      setProgress(35);
+      setError("File could not be validated. Please check your connection and try again.");
+      return;
+    }
+
+    let nextProgress = 20;
     const interval = window.setInterval(() => {
       nextProgress += Math.max(3, Math.round(Math.random() * 10));
 
