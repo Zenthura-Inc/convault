@@ -1,6 +1,11 @@
 import type { NextRequest } from "next/server";
 
 import {
+  createConversionJob,
+  toPublicConversionJob,
+} from "@/lib/conversion-jobs";
+import { checkRateLimit } from "@/lib/rate-limit";
+import {
   MAX_UPLOAD_BYTES,
   sanitizeDisplayFilename,
   validateUploadBytes,
@@ -11,7 +16,6 @@ export const runtime = "nodejs";
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
-const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 type ErrorCode =
   | "invalid_content_type"
@@ -24,7 +28,12 @@ type ErrorCode =
   | "rate_limited"
   | "internal_error";
 
-function jsonError(status: number, code: ErrorCode, message: string, retryAfter?: number) {
+function jsonError(
+  status: number,
+  code: ErrorCode,
+  message: string,
+  headers?: HeadersInit,
+) {
   return Response.json(
     {
       ok: false,
@@ -35,20 +44,34 @@ function jsonError(status: number, code: ErrorCode, message: string, retryAfter?
     },
     {
       status,
-      headers: retryAfter ? { "Retry-After": String(retryAfter) } : undefined,
+      headers,
     },
   );
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const rateLimit = checkRateLimit(request);
+    const rateLimit = await checkRateLimit({
+      key: getClientKey(request),
+      limit: RATE_LIMIT_MAX_REQUESTS,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    });
+
+    const rateLimitHeaders = {
+      "RateLimit-Limit": String(RATE_LIMIT_MAX_REQUESTS),
+      "RateLimit-Remaining": String(rateLimit.remaining),
+      "RateLimit-Reset": String(Math.ceil(rateLimit.resetAt / 1000)),
+    };
+
     if (!rateLimit.allowed) {
       return jsonError(
         429,
         "rate_limited",
         "Too many upload attempts. Please wait a moment and try again.",
-        rateLimit.retryAfter,
+        {
+          ...rateLimitHeaders,
+          "Retry-After": String(rateLimit.retryAfter ?? 60),
+        },
       );
     }
 
@@ -102,48 +125,23 @@ export async function POST(request: NextRequest) {
       return jsonError(400, "unsupported_output", "Selected output format is not supported for this file.");
     }
 
+    const job = createConversionJob({
+      filename: sanitizeDisplayFilename(file.name),
+      bytes: file.size,
+      inputFormat: validation.detectedFormat,
+      outputFormat,
+      mimeType: validation.mimeType,
+    });
+
     return Response.json({
       ok: true,
-      upload: {
-        id: crypto.randomUUID(),
-        token: crypto.randomUUID(),
-        filename: sanitizeDisplayFilename(file.name),
-        bytes: file.size,
-        detectedFormat: validation.detectedFormat,
-        mimeType: validation.mimeType,
-        allowedOutputs: validation.allowedOutputs,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      },
-    });
+      job: toPublicConversionJob(job),
+      token: job.token,
+      allowedOutputs: validation.allowedOutputs,
+    }, { headers: rateLimitHeaders });
   } catch {
     return jsonError(500, "internal_error", "Upload could not be validated.");
   }
-}
-
-function checkRateLimit(request: NextRequest) {
-  const key = getClientKey(request);
-  const now = Date.now();
-
-  for (const [bucketKey, bucket] of rateLimitBuckets) {
-    if (bucket.resetAt <= now) rateLimitBuckets.delete(bucketKey);
-  }
-
-  const bucket = rateLimitBuckets.get(key);
-
-  if (!bucket || bucket.resetAt <= now) {
-    rateLimitBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true };
-  }
-
-  if (bucket.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return {
-      allowed: false,
-      retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)),
-    };
-  }
-
-  bucket.count += 1;
-  return { allowed: true };
 }
 
 function getClientKey(request: NextRequest) {

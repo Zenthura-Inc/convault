@@ -178,6 +178,11 @@ export function ConverterCard() {
 
     let validationPayload: {
       ok?: boolean;
+      job?: {
+        id?: string;
+        outputFormat?: string;
+      };
+      token?: string;
       error?: { message?: string };
     } | null = null;
 
@@ -196,6 +201,13 @@ export function ConverterCard() {
           validationPayload?.error?.message ??
             "File could not be validated. Please try another file.",
         );
+        return;
+      }
+
+      if (!validationPayload.job?.id || !validationPayload.token) {
+        setStep("selected");
+        setProgress(35);
+        setError("Conversion job could not be created. Please try again.");
         return;
       }
     } catch {
