@@ -15,43 +15,17 @@ const MAX_BYTES = 25 * 1024 * 1024;
 const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.mp3,.wav";
 
 const OUTPUTS_BY_FORMAT: Record<ClientInputFormat, FormatOption[]> = {
-  jpg: [
-    { label: "JPG", value: "jpg" },
-    { label: "PNG", value: "png" },
-    { label: "WEBP", value: "webp" },
-  ],
-  png: [
-    { label: "JPG", value: "jpg" },
-    { label: "PNG", value: "png" },
-    { label: "WEBP", value: "webp" },
-  ],
-  webp: [
-    { label: "JPG", value: "jpg" },
-    { label: "PNG", value: "png" },
-    { label: "WEBP", value: "webp" },
-  ],
-  gif: [
-    { label: "GIF", value: "gif" },
-    { label: "JPG", value: "jpg" },
-    { label: "PNG", value: "png" },
-    { label: "WEBP", value: "webp" },
-  ],
-  pdf: [
-    { label: "PDF", value: "pdf" },
-    { label: "TXT", value: "txt" },
-  ],
+  jpg: [{ label: "JPG", value: "jpg" }],
+  png: [{ label: "PNG", value: "png" }],
+  webp: [{ label: "WEBP", value: "webp" }],
+  gif: [{ label: "GIF", value: "gif" }],
+  pdf: [{ label: "PDF", value: "pdf" }],
   txt: [
     { label: "TXT", value: "txt" },
     { label: "PDF", value: "pdf" },
   ],
-  mp3: [
-    { label: "MP3", value: "mp3" },
-    { label: "WAV", value: "wav" },
-  ],
-  wav: [
-    { label: "MP3", value: "mp3" },
-    { label: "WAV", value: "wav" },
-  ],
+  mp3: [{ label: "MP3", value: "mp3" }],
+  wav: [{ label: "WAV", value: "wav" }],
 };
 
 function formatBytes(bytes: number) {
@@ -101,16 +75,6 @@ function isAllowedFile(file: File) {
   return true;
 }
 
-function sanitizeDownloadBaseName(name: string) {
-  return (
-    name
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^\w.-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 80) || "converted-file"
-  );
-}
-
 export function ConverterCard() {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -124,12 +88,6 @@ export function ConverterCard() {
   const [downloadUrl, setDownloadUrl] = React.useState("");
   const [downloadName, setDownloadName] = React.useState("");
 
-  React.useEffect(() => {
-    return () => {
-      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-    };
-  }, [downloadUrl]);
-
   const formats = React.useMemo(() => getAllowedFormats(inputFormat), [inputFormat]);
 
   function resetAll(options: { preserveError?: boolean } = {}) {
@@ -141,7 +99,6 @@ export function ConverterCard() {
     if (!options.preserveError) setError("");
     setProgress(0);
 
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl("");
     setDownloadName("");
 
@@ -174,7 +131,6 @@ export function ConverterCard() {
     setStep("selected");
     setOutputFormat(nextFormats[0]?.value ?? "");
 
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
     setDownloadUrl("");
     setDownloadName("");
     setProgress(0);
@@ -210,6 +166,7 @@ export function ConverterCard() {
         id?: string;
         status?: string;
         outputFormat?: string;
+        resultFilename?: string;
       };
       token?: string;
       error?: { message?: string };
@@ -257,35 +214,44 @@ export function ConverterCard() {
         setError("Conversion job could not be verified. Please try again.");
         return;
       }
+
+      setProgress(65);
+
+      const processResponse = await fetch(
+        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}/process?token=${encodeURIComponent(
+          validationPayload.token,
+        )}`,
+        {
+          method: "POST",
+          cache: "no-store",
+        },
+      );
+      const processPayload = await processResponse.json().catch(() => null);
+
+      if (!processResponse.ok || processPayload?.ok !== true || processPayload.job?.status !== "ready") {
+        setStep("selected");
+        setProgress(35);
+        setError(
+          processPayload?.error?.message ??
+            "This conversion is not available yet. Please try another format.",
+        );
+        return;
+      }
+
+      setProgress(100);
+      setDownloadUrl(
+        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}/download?token=${encodeURIComponent(
+          validationPayload.token,
+        )}`,
+      );
+      setDownloadName(processPayload.job.resultFilename ?? `converted.${outputFormat}`);
+      setStep("ready");
     } catch {
       setStep("selected");
       setProgress(35);
       setError("File could not be validated. Please check your connection and try again.");
       return;
     }
-
-    let nextProgress = 20;
-    const interval = window.setInterval(() => {
-      nextProgress += Math.max(3, Math.round(Math.random() * 10));
-
-      if (nextProgress >= 100) {
-        window.clearInterval(interval);
-        setProgress(100);
-
-        const baseName = sanitizeDownloadBaseName(file.name);
-        const name = `${baseName}.${outputFormat}`;
-        const content = `Convault mock conversion\n\nInput: ${file.name}\nOutput: ${name}\n\nThis is a placeholder file for Phase 1 UI.`;
-        const blob = new Blob([content], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-
-        setDownloadUrl(url);
-        setDownloadName(name);
-        setStep("ready");
-        return;
-      }
-
-      setProgress(nextProgress);
-    }, 250);
   }
 
   const isConverting = step === "converting";

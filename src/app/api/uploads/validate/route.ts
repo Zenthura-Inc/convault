@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
       inputFormat: validation.detectedFormat,
       outputFormat,
       mimeType: validation.mimeType,
+      sourceBytes: bytes,
     });
 
     return Response.json(

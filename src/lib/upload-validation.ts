@@ -17,14 +17,14 @@ export type UploadValidationResult = {
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 const OUTPUTS_BY_FORMAT: Record<SupportedUploadFormat, string[]> = {
-  jpg: ["jpg", "png", "webp"],
-  png: ["jpg", "png", "webp"],
-  webp: ["jpg", "png", "webp"],
-  gif: ["gif", "jpg", "png", "webp"],
-  pdf: ["pdf", "txt"],
+  jpg: ["jpg"],
+  png: ["png"],
+  webp: ["webp"],
+  gif: ["gif"],
+  pdf: ["pdf"],
   txt: ["txt", "pdf"],
-  mp3: ["mp3", "wav"],
-  wav: ["mp3", "wav"],
+  mp3: ["mp3"],
+  wav: ["wav"],
 };
 
 const MIME_BY_FORMAT: Record<SupportedUploadFormat, string> = {
