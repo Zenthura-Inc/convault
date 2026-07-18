@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import {
+  deleteAuthorizedConversionJob,
   getAuthorizedConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
@@ -60,6 +61,45 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
       job: toPublicConversionJob(job),
     },
     {
+      headers: NO_STORE_HEADERS,
+    },
+  );
+}
+
+export async function DELETE(request: NextRequest, context: JobRouteContext) {
+  const { id } = await context.params;
+  const token = request.nextUrl.searchParams.get("token") ?? "";
+
+  if (!isValidIdentifier(id) || !isValidIdentifier(token)) {
+    return jobNotFound();
+  }
+
+  const deleted = deleteAuthorizedConversionJob(id, token);
+  if (!deleted) {
+    return jobNotFound();
+  }
+
+  return Response.json(
+    {
+      ok: true,
+    },
+    {
+      headers: NO_STORE_HEADERS,
+    },
+  );
+}
+
+function jobNotFound() {
+  return Response.json(
+    {
+      ok: false,
+      error: {
+        code: "not_found",
+        message: "Conversion job was not found or has expired.",
+      },
+    },
+    {
+      status: 404,
       headers: NO_STORE_HEADERS,
     },
   );

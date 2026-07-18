@@ -11,6 +11,11 @@ type FormatOption = {
   value: ClientInputFormat;
 };
 
+type ActiveJob = {
+  id: string;
+  token: string;
+};
+
 const MAX_BYTES = 25 * 1024 * 1024;
 const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.mp3,.wav";
 
@@ -87,10 +92,36 @@ export function ConverterCard() {
   const [progress, setProgress] = React.useState(0);
   const [downloadUrl, setDownloadUrl] = React.useState("");
   const [downloadName, setDownloadName] = React.useState("");
+  const [activeJob, setActiveJob] = React.useState<ActiveJob | null>(null);
 
   const formats = React.useMemo(() => getAllowedFormats(inputFormat), [inputFormat]);
 
+  React.useEffect(() => {
+    return () => {
+      if (!activeJob) return;
+
+      void fetch(`/api/jobs/${encodeURIComponent(activeJob.id)}?token=${encodeURIComponent(activeJob.token)}`, {
+        method: "DELETE",
+        cache: "no-store",
+        keepalive: true,
+      }).catch(() => undefined);
+    };
+  }, [activeJob]);
+
+  function deleteActiveJob(job = activeJob) {
+    if (!job) return;
+
+    setActiveJob((current) => (current?.id === job.id ? null : current));
+
+    void fetch(`/api/jobs/${encodeURIComponent(job.id)}?token=${encodeURIComponent(job.token)}`, {
+      method: "DELETE",
+      cache: "no-store",
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+
   function resetAll(options: { preserveError?: boolean } = {}) {
+    deleteActiveJob();
     setStep("idle");
     setFile(null);
     setCategory("unknown");
@@ -108,6 +139,9 @@ export function ConverterCard() {
   }
 
   function applyFile(next: File) {
+    if (step === "converting") return;
+
+    deleteActiveJob();
     setError("");
 
     if (!isAllowedFile(next)) {
@@ -196,6 +230,11 @@ export function ConverterCard() {
         setError("Conversion job could not be created. Please try again.");
         return;
       }
+
+      setActiveJob({
+        id: validationPayload.job.id,
+        token: validationPayload.token,
+      });
 
       const statusResponse = await fetch(
         `/api/jobs/${encodeURIComponent(validationPayload.job.id)}?token=${encodeURIComponent(

@@ -128,6 +128,20 @@ export function getAuthorizedConversionResult(id: string, token: string) {
   };
 }
 
+export function deleteAuthorizedConversionJob(id: string, token: string) {
+  cleanupExpiredJobs();
+
+  const job = jobs.get(id);
+  if (!job || !isTokenMatch(job.token, token)) {
+    return false;
+  }
+
+  job.sourceBytes = new Uint8Array();
+  job.resultBytes = undefined;
+  jobs.delete(id);
+  return true;
+}
+
 export function toPublicConversionJob(job: ConversionJob) {
   return {
     id: job.id,
