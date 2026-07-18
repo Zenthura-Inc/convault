@@ -16,6 +16,9 @@ export const runtime = "nodejs";
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store",
+};
 
 type ErrorCode =
   | "invalid_content_type"
@@ -44,7 +47,10 @@ function jsonError(
     },
     {
       status,
-      headers,
+      headers: {
+        ...NO_STORE_HEADERS,
+        ...headers,
+      },
     },
   );
 }
@@ -133,12 +139,20 @@ export async function POST(request: NextRequest) {
       mimeType: validation.mimeType,
     });
 
-    return Response.json({
-      ok: true,
-      job: toPublicConversionJob(job),
-      token: job.token,
-      allowedOutputs: validation.allowedOutputs,
-    }, { headers: rateLimitHeaders });
+    return Response.json(
+      {
+        ok: true,
+        job: toPublicConversionJob(job),
+        token: job.token,
+        allowedOutputs: validation.allowedOutputs,
+      },
+      {
+        headers: {
+          ...NO_STORE_HEADERS,
+          ...rateLimitHeaders,
+        },
+      },
+    );
   } catch {
     return jsonError(500, "internal_error", "Upload could not be validated.");
   }

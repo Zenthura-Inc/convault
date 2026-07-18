@@ -2,15 +2,57 @@
 
 import * as React from "react";
 
-type FileCategory = "image" | "document" | "audio" | "video" | "unknown";
+type FileCategory = "image" | "document" | "audio" | "unknown";
+type ClientInputFormat = "jpg" | "png" | "webp" | "gif" | "pdf" | "txt" | "mp3" | "wav";
 type Step = "idle" | "selected" | "converting" | "ready";
 
 type FormatOption = {
   label: string;
-  value: string;
+  value: ClientInputFormat;
 };
 
 const MAX_BYTES = 25 * 1024 * 1024;
+const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.mp3,.wav";
+
+const OUTPUTS_BY_FORMAT: Record<ClientInputFormat, FormatOption[]> = {
+  jpg: [
+    { label: "JPG", value: "jpg" },
+    { label: "PNG", value: "png" },
+    { label: "WEBP", value: "webp" },
+  ],
+  png: [
+    { label: "JPG", value: "jpg" },
+    { label: "PNG", value: "png" },
+    { label: "WEBP", value: "webp" },
+  ],
+  webp: [
+    { label: "JPG", value: "jpg" },
+    { label: "PNG", value: "png" },
+    { label: "WEBP", value: "webp" },
+  ],
+  gif: [
+    { label: "GIF", value: "gif" },
+    { label: "JPG", value: "jpg" },
+    { label: "PNG", value: "png" },
+    { label: "WEBP", value: "webp" },
+  ],
+  pdf: [
+    { label: "PDF", value: "pdf" },
+    { label: "TXT", value: "txt" },
+  ],
+  txt: [
+    { label: "TXT", value: "txt" },
+    { label: "PDF", value: "pdf" },
+  ],
+  mp3: [
+    { label: "MP3", value: "mp3" },
+    { label: "WAV", value: "wav" },
+  ],
+  wav: [
+    { label: "MP3", value: "mp3" },
+    { label: "WAV", value: "wav" },
+  ],
+};
 
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
@@ -25,54 +67,36 @@ function formatBytes(bytes: number) {
   return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
-function getFileCategory(file: File): FileCategory {
+function getClientInputFormat(file: File): ClientInputFormat | null {
   const mime = file.type.toLowerCase();
-  if (mime.startsWith("image/")) return "image";
-  if (mime.startsWith("audio/")) return "audio";
-  if (mime.startsWith("video/")) return "video";
-
   const name = file.name.toLowerCase();
-  if (name.endsWith(".pdf") || name.endsWith(".docx") || name.endsWith(".txt")) {
-    return "document";
-  }
 
+  if (mime === "image/jpeg" || name.endsWith(".jpg") || name.endsWith(".jpeg")) return "jpg";
+  if (mime === "image/png" || name.endsWith(".png")) return "png";
+  if (mime === "image/webp" || name.endsWith(".webp")) return "webp";
+  if (mime === "image/gif" || name.endsWith(".gif")) return "gif";
+  if (mime === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if (mime === "text/plain" || name.endsWith(".txt")) return "txt";
+  if (mime === "audio/mpeg" || mime === "audio/mp3" || name.endsWith(".mp3")) return "mp3";
+  if (mime === "audio/wav" || mime === "audio/x-wav" || name.endsWith(".wav")) return "wav";
+
+  return null;
+}
+
+function getFileCategory(format: ClientInputFormat | null): FileCategory {
+  if (!format) return "unknown";
+  if (["jpg", "png", "webp", "gif"].includes(format)) return "image";
+  if (["pdf", "txt"].includes(format)) return "document";
+  if (["mp3", "wav"].includes(format)) return "audio";
   return "unknown";
 }
 
-function getAllowedFormats(category: FileCategory): FormatOption[] {
-  switch (category) {
-    case "image":
-      return [
-        { label: "JPG", value: "jpg" },
-        { label: "PNG", value: "png" },
-        { label: "WEBP", value: "webp" },
-        { label: "GIF", value: "gif" },
-      ];
-    case "document":
-      return [
-        { label: "PDF", value: "pdf" },
-        { label: "DOCX", value: "docx" },
-        { label: "TXT", value: "txt" },
-      ];
-    case "audio":
-      return [
-        { label: "MP3", value: "mp3" },
-        { label: "WAV", value: "wav" },
-      ];
-    case "video":
-      return [
-        { label: "MP4", value: "mp4" },
-        { label: "MOV", value: "mov" },
-        { label: "AVI", value: "avi" },
-      ];
-    default:
-      return [];
-  }
+function getAllowedFormats(format: ClientInputFormat | null): FormatOption[] {
+  return format ? OUTPUTS_BY_FORMAT[format] : [];
 }
 
 function isAllowedFile(file: File) {
-  const category = getFileCategory(file);
-  if (category === "unknown") return false;
+  if (!getClientInputFormat(file)) return false;
   if (file.size > MAX_BYTES) return false;
   return true;
 }
@@ -93,6 +117,7 @@ export function ConverterCard() {
   const [step, setStep] = React.useState<Step>("idle");
   const [file, setFile] = React.useState<File | null>(null);
   const [category, setCategory] = React.useState<FileCategory>("unknown");
+  const [inputFormat, setInputFormat] = React.useState<ClientInputFormat | null>(null);
   const [outputFormat, setOutputFormat] = React.useState("");
   const [error, setError] = React.useState("");
   const [progress, setProgress] = React.useState(0);
@@ -105,12 +130,13 @@ export function ConverterCard() {
     };
   }, [downloadUrl]);
 
-  const formats = React.useMemo(() => getAllowedFormats(category), [category]);
+  const formats = React.useMemo(() => getAllowedFormats(inputFormat), [inputFormat]);
 
   function resetAll(options: { preserveError?: boolean } = {}) {
     setStep("idle");
     setFile(null);
     setCategory("unknown");
+    setInputFormat(null);
     setOutputFormat("");
     if (!options.preserveError) setError("");
     setProgress(0);
@@ -132,17 +158,19 @@ export function ConverterCard() {
       setError(
         tooBig
           ? `File is too large. Max size is ${formatBytes(MAX_BYTES)}.`
-          : "Unsupported file type. Please upload an image, document, audio, or video file.",
+          : "Unsupported file type. Please upload JPG, PNG, WEBP, GIF, PDF, TXT, MP3, or WAV.",
       );
       resetAll({ preserveError: true });
       return;
     }
 
-    const nextCategory = getFileCategory(next);
-    const nextFormats = getAllowedFormats(nextCategory);
+    const nextInputFormat = getClientInputFormat(next);
+    const nextCategory = getFileCategory(nextInputFormat);
+    const nextFormats = getAllowedFormats(nextInputFormat);
 
     setFile(next);
     setCategory(nextCategory);
+    setInputFormat(nextInputFormat);
     setStep("selected");
     setOutputFormat(nextFormats[0]?.value ?? "");
 
@@ -180,6 +208,7 @@ export function ConverterCard() {
       ok?: boolean;
       job?: {
         id?: string;
+        status?: string;
         outputFormat?: string;
       };
       token?: string;
@@ -208,6 +237,24 @@ export function ConverterCard() {
         setStep("selected");
         setProgress(35);
         setError("Conversion job could not be created. Please try again.");
+        return;
+      }
+
+      const statusResponse = await fetch(
+        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}?token=${encodeURIComponent(
+          validationPayload.token,
+        )}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        },
+      );
+      const statusPayload = await statusResponse.json().catch(() => null);
+
+      if (!statusResponse.ok || statusPayload?.ok !== true) {
+        setStep("selected");
+        setProgress(35);
+        setError("Conversion job could not be verified. Please try again.");
         return;
       }
     } catch {
@@ -313,6 +360,7 @@ export function ConverterCard() {
           <input
             ref={inputRef}
             type="file"
+            accept={ACCEPTED_FILE_TYPES}
             className="sr-only"
             onChange={onPickFile}
             aria-describedby="supported-file-types"
@@ -328,7 +376,7 @@ export function ConverterCard() {
           </button>
 
           <p id="supported-file-types" className="text-xs text-zinc-500 dark:text-zinc-400">
-            Supported: images, documents, audio, video
+            Supported: JPG, PNG, WEBP, GIF, PDF, TXT, MP3, WAV
           </p>
         </div>
       </div>

@@ -7,6 +7,10 @@ import {
 
 export const runtime = "nodejs";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store",
+};
+
 type JobRouteContext = {
   params: Promise<{
     id: string;
@@ -26,7 +30,10 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
           message: "Conversion job was not found or has expired.",
         },
       },
-      { status: 404 },
+      {
+        status: 404,
+        headers: NO_STORE_HEADERS,
+      },
     );
   }
 
@@ -40,14 +47,22 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
           message: "Conversion job was not found or has expired.",
         },
       },
-      { status: 404 },
+      {
+        status: 404,
+        headers: NO_STORE_HEADERS,
+      },
     );
   }
 
-  return Response.json({
-    ok: true,
-    job: toPublicConversionJob(job),
-  });
+  return Response.json(
+    {
+      ok: true,
+      job: toPublicConversionJob(job),
+    },
+    {
+      headers: NO_STORE_HEADERS,
+    },
+  );
 }
 
 function isValidIdentifier(value: string) {
