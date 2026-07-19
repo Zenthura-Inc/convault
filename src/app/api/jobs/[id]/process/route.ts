@@ -19,7 +19,7 @@ type JobRouteContext = {
 
 export async function POST(request: NextRequest, context: JobRouteContext) {
   const { id } = await context.params;
-  const token = request.nextUrl.searchParams.get("token") ?? "";
+  const token = getRequestToken(request);
 
   if (!isValidIdentifier(id) || !isValidIdentifier(token)) {
     return jobNotFound();
@@ -67,4 +67,15 @@ function jobNotFound() {
 
 function isValidIdentifier(value: string) {
   return /^[0-9a-f-]{36}$/i.test(value);
+}
+
+function getRequestToken(request: NextRequest) {
+  const authorization = request.headers.get("authorization") ?? "";
+  const [scheme, token] = authorization.split(/\s+/, 2);
+
+  if (scheme?.toLowerCase() === "bearer" && token) {
+    return token;
+  }
+
+  return request.nextUrl.searchParams.get("token") ?? "";
 }

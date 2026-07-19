@@ -73,8 +73,11 @@ export function ConverterCard() {
     return () => {
       if (!activeJob) return;
 
-      void fetch(`/api/jobs/${encodeURIComponent(activeJob.id)}?token=${encodeURIComponent(activeJob.token)}`, {
+      void fetch(`/api/jobs/${encodeURIComponent(activeJob.id)}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${activeJob.token}`,
+        },
         cache: "no-store",
         keepalive: true,
       }).catch(() => undefined);
@@ -86,8 +89,11 @@ export function ConverterCard() {
 
     setActiveJob((current) => (current?.id === job.id ? null : current));
 
-    void fetch(`/api/jobs/${encodeURIComponent(job.id)}?token=${encodeURIComponent(job.token)}`, {
+    void fetch(`/api/jobs/${encodeURIComponent(job.id)}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${job.token}`,
+      },
       cache: "no-store",
       keepalive: true,
     }).catch(() => undefined);
@@ -209,15 +215,13 @@ export function ConverterCard() {
         token: validationPayload.token,
       });
 
-      const statusResponse = await fetch(
-        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}?token=${encodeURIComponent(
-          validationPayload.token,
-        )}`,
-        {
-          method: "GET",
-          cache: "no-store",
+      const statusResponse = await fetch(`/api/jobs/${encodeURIComponent(validationPayload.job.id)}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${validationPayload.token}`,
         },
-      );
+        cache: "no-store",
+      });
       const statusPayload = await statusResponse.json().catch(() => null);
 
       if (!statusResponse.ok || statusPayload?.ok !== true) {
@@ -229,15 +233,13 @@ export function ConverterCard() {
 
       setProgress(65);
 
-      const processResponse = await fetch(
-        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}/process?token=${encodeURIComponent(
-          validationPayload.token,
-        )}`,
-        {
-          method: "POST",
-          cache: "no-store",
+      const processResponse = await fetch(`/api/jobs/${encodeURIComponent(validationPayload.job.id)}/process`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${validationPayload.token}`,
         },
-      );
+        cache: "no-store",
+      });
       const processPayload = await processResponse.json().catch(() => null);
 
       if (!processResponse.ok || processPayload?.ok !== true || processPayload.job?.status !== "ready") {
