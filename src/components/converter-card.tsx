@@ -65,6 +65,7 @@ export function ConverterCard() {
   const [progress, setProgress] = React.useState(0);
   const [downloadUrl, setDownloadUrl] = React.useState("");
   const [downloadName, setDownloadName] = React.useState("");
+  const [downloading, setDownloading] = React.useState(false);
   const [activeJob, setActiveJob] = React.useState<ActiveJob | null>(null);
 
   const formats = React.useMemo(() => getAllowedFormatOptions(inputFormat), [inputFormat]);
@@ -111,6 +112,7 @@ export function ConverterCard() {
 
     setDownloadUrl("");
     setDownloadName("");
+    setDownloading(false);
 
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -146,6 +148,7 @@ export function ConverterCard() {
 
     setDownloadUrl("");
     setDownloadName("");
+    setDownloading(false);
     setProgress(0);
   }
 
@@ -253,11 +256,7 @@ export function ConverterCard() {
       }
 
       setProgress(100);
-      setDownloadUrl(
-        `/api/jobs/${encodeURIComponent(validationPayload.job.id)}/download?token=${encodeURIComponent(
-          validationPayload.token,
-        )}`,
-      );
+      setDownloadUrl(`/api/jobs/${encodeURIComponent(validationPayload.job.id)}/download`);
       setDownloadName(processPayload.job.resultFilename ?? `converted.${outputFormat}`);
       setStep("ready");
     } catch {
@@ -265,6 +264,46 @@ export function ConverterCard() {
       setProgress(35);
       setError("File could not be validated. Please check your connection and try again.");
       return;
+    }
+  }
+
+  async function downloadResult() {
+    if (!downloadUrl || !downloadName || !activeJob) {
+      setError("Download is not ready yet. Please convert the file again.");
+      return;
+    }
+
+    setDownloading(true);
+    setError("");
+
+    try {
+      const response = await fetch(downloadUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${activeJob.token}`,
+        },
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setError("Download is no longer available. Please convert the file again.");
+        return;
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = downloadName;
+      anchor.rel = "noopener";
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      setError("Download failed. Please try again.");
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -411,13 +450,14 @@ export function ConverterCard() {
 
             <div className="flex items-end">
               {step === "ready" && downloadUrl ? (
-                <a
-                  href={downloadUrl}
-                  download={downloadName}
+                <button
+                  type="button"
                   className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
+                  onClick={downloadResult}
+                  disabled={downloading}
                 >
-                  Download
-                </a>
+                  {downloading ? "Downloading..." : "Download"}
+                </button>
               ) : (
                 <button
                   type="button"
