@@ -1,41 +1,15 @@
-export type SupportedUploadFormat =
-  | "jpg"
-  | "png"
-  | "webp"
-  | "gif"
-  | "pdf"
-  | "txt"
-  | "mp3"
-  | "wav";
+import {
+  MIME_BY_FORMAT,
+  OUTPUTS_BY_FORMAT,
+  type SupportedUploadFormat,
+} from "@/lib/conversion-capabilities";
+
+export { MAX_UPLOAD_BYTES, type SupportedUploadFormat } from "@/lib/conversion-capabilities";
 
 export type UploadValidationResult = {
   detectedFormat: SupportedUploadFormat;
   mimeType: string;
-  allowedOutputs: string[];
-};
-
-export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-
-const OUTPUTS_BY_FORMAT: Record<SupportedUploadFormat, string[]> = {
-  jpg: ["jpg"],
-  png: ["png"],
-  webp: ["webp"],
-  gif: ["gif"],
-  pdf: ["pdf"],
-  txt: ["txt", "pdf"],
-  mp3: ["mp3"],
-  wav: ["wav"],
-};
-
-const MIME_BY_FORMAT: Record<SupportedUploadFormat, string> = {
-  jpg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  gif: "image/gif",
-  pdf: "application/pdf",
-  txt: "text/plain",
-  mp3: "audio/mpeg",
-  wav: "audio/wav",
+  allowedOutputs: readonly SupportedUploadFormat[];
 };
 
 export function sanitizeDisplayFilename(name: string) {

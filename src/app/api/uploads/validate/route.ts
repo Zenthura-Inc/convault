@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     }
 
     const outputFormat = String(form.get("outputFormat") ?? "").toLowerCase();
-    if (!validation.allowedOutputs.includes(outputFormat)) {
+    if (!validation.allowedOutputs.some((allowedOutput) => allowedOutput === outputFormat)) {
       return jsonError(400, "unsupported_output", "Selected output format is not supported for this file.");
     }
 

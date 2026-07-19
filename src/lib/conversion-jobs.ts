@@ -1,6 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 
-import type { SupportedUploadFormat } from "@/lib/upload-validation";
+import {
+  MAX_UPLOAD_BYTES,
+  type SupportedUploadFormat,
+} from "@/lib/conversion-capabilities";
 
 export type ConversionJobStatus = "validated" | "queued" | "processing" | "ready" | "failed" | "expired";
 
@@ -33,7 +36,8 @@ type CreateConversionJobInput = {
 };
 
 const DEFAULT_JOB_TTL_MS = 15 * 60 * 1000;
-const MAX_IN_MEMORY_JOBS = 500;
+const MAX_IN_MEMORY_JOBS = 100;
+const MAX_IN_MEMORY_BYTES = MAX_UPLOAD_BYTES * 10;
 const jobs = new Map<string, ConversionJob>();
 
 export function createConversionJob({
@@ -46,10 +50,7 @@ export function createConversionJob({
   ttlMs = DEFAULT_JOB_TTL_MS,
 }: CreateConversionJobInput) {
   cleanupExpiredJobs();
-
-  if (jobs.size >= MAX_IN_MEMORY_JOBS) {
-    deleteOldestJob();
-  }
+  enforceJobStoreLimits(sourceBytes.byteLength);
 
   const now = Date.now();
   const job: ConversionJob = {
@@ -67,6 +68,7 @@ export function createConversionJob({
   };
 
   jobs.set(job.id, job);
+  enforceJobStoreLimits();
   return job;
 }
 
@@ -104,6 +106,7 @@ export function processAuthorizedConversionJob(id: string, token: string) {
     job.status = "failed";
     job.failureReason = "This conversion is not available yet.";
     job.sourceBytes = new Uint8Array();
+    enforceJobStoreLimits();
     return job;
   }
 
@@ -112,6 +115,7 @@ export function processAuthorizedConversionJob(id: string, token: string) {
   job.resultFilename = result.filename;
   job.resultMimeType = result.mimeType;
   job.sourceBytes = new Uint8Array();
+  enforceJobStoreLimits();
   return job;
 }
 
@@ -266,9 +270,35 @@ function cleanupExpiredJobs() {
   }
 }
 
+function enforceJobStoreLimits(additionalBytes = 0) {
+  while (
+    jobs.size > MAX_IN_MEMORY_JOBS ||
+    getTotalStoredBytes() + additionalBytes > MAX_IN_MEMORY_BYTES
+  ) {
+    if (!deleteOldestJob()) return;
+  }
+}
+
+function getTotalStoredBytes() {
+  let total = 0;
+
+  for (const job of jobs.values()) {
+    total += job.sourceBytes.byteLength + (job.resultBytes?.byteLength ?? 0);
+  }
+
+  return total;
+}
+
 function deleteOldestJob() {
   const oldestKey = jobs.keys().next().value;
-  if (oldestKey) jobs.delete(oldestKey);
+  if (!oldestKey) return false;
+  const oldestJob = jobs.get(oldestKey);
+  if (oldestJob) {
+    oldestJob.sourceBytes = new Uint8Array();
+    oldestJob.resultBytes = undefined;
+  }
+  jobs.delete(oldestKey);
+  return true;
 }
 
 function isTokenMatch(expected: string, received: string) {

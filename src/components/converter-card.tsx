@@ -2,36 +2,21 @@
 
 import * as React from "react";
 
-type FileCategory = "image" | "document" | "audio" | "unknown";
-type ClientInputFormat = "jpg" | "png" | "webp" | "gif" | "pdf" | "txt" | "mp3" | "wav";
-type Step = "idle" | "selected" | "converting" | "ready";
-
-type FormatOption = {
-  label: string;
-  value: ClientInputFormat;
-};
+import {
+  ACCEPTED_FILE_TYPES,
+  getAllowedFormatOptions,
+  getFormatCategory,
+  MAX_UPLOAD_BYTES,
+  type FileCategory,
+  type SupportedUploadFormat,
+} from "@/lib/conversion-capabilities";
 
 type ActiveJob = {
   id: string;
   token: string;
 };
 
-const MAX_BYTES = 25 * 1024 * 1024;
-const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.mp3,.wav";
-
-const OUTPUTS_BY_FORMAT: Record<ClientInputFormat, FormatOption[]> = {
-  jpg: [{ label: "JPG", value: "jpg" }],
-  png: [{ label: "PNG", value: "png" }],
-  webp: [{ label: "WEBP", value: "webp" }],
-  gif: [{ label: "GIF", value: "gif" }],
-  pdf: [{ label: "PDF", value: "pdf" }],
-  txt: [
-    { label: "TXT", value: "txt" },
-    { label: "PDF", value: "pdf" },
-  ],
-  mp3: [{ label: "MP3", value: "mp3" }],
-  wav: [{ label: "WAV", value: "wav" }],
-};
+type Step = "idle" | "selected" | "converting" | "ready";
 
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
@@ -46,7 +31,7 @@ function formatBytes(bytes: number) {
   return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
-function getClientInputFormat(file: File): ClientInputFormat | null {
+function getClientInputFormat(file: File): SupportedUploadFormat | null {
   const mime = file.type.toLowerCase();
   const name = file.name.toLowerCase();
 
@@ -62,21 +47,9 @@ function getClientInputFormat(file: File): ClientInputFormat | null {
   return null;
 }
 
-function getFileCategory(format: ClientInputFormat | null): FileCategory {
-  if (!format) return "unknown";
-  if (["jpg", "png", "webp", "gif"].includes(format)) return "image";
-  if (["pdf", "txt"].includes(format)) return "document";
-  if (["mp3", "wav"].includes(format)) return "audio";
-  return "unknown";
-}
-
-function getAllowedFormats(format: ClientInputFormat | null): FormatOption[] {
-  return format ? OUTPUTS_BY_FORMAT[format] : [];
-}
-
 function isAllowedFile(file: File) {
   if (!getClientInputFormat(file)) return false;
-  if (file.size > MAX_BYTES) return false;
+  if (file.size > MAX_UPLOAD_BYTES) return false;
   return true;
 }
 
@@ -86,7 +59,7 @@ export function ConverterCard() {
   const [step, setStep] = React.useState<Step>("idle");
   const [file, setFile] = React.useState<File | null>(null);
   const [category, setCategory] = React.useState<FileCategory>("unknown");
-  const [inputFormat, setInputFormat] = React.useState<ClientInputFormat | null>(null);
+  const [inputFormat, setInputFormat] = React.useState<SupportedUploadFormat | null>(null);
   const [outputFormat, setOutputFormat] = React.useState("");
   const [error, setError] = React.useState("");
   const [progress, setProgress] = React.useState(0);
@@ -94,7 +67,7 @@ export function ConverterCard() {
   const [downloadName, setDownloadName] = React.useState("");
   const [activeJob, setActiveJob] = React.useState<ActiveJob | null>(null);
 
-  const formats = React.useMemo(() => getAllowedFormats(inputFormat), [inputFormat]);
+  const formats = React.useMemo(() => getAllowedFormatOptions(inputFormat), [inputFormat]);
 
   React.useEffect(() => {
     return () => {
@@ -145,10 +118,10 @@ export function ConverterCard() {
     setError("");
 
     if (!isAllowedFile(next)) {
-      const tooBig = next.size > MAX_BYTES;
+      const tooBig = next.size > MAX_UPLOAD_BYTES;
       setError(
         tooBig
-          ? `File is too large. Max size is ${formatBytes(MAX_BYTES)}.`
+          ? `File is too large. Max size is ${formatBytes(MAX_UPLOAD_BYTES)}.`
           : "Unsupported file type. Please upload JPG, PNG, WEBP, GIF, PDF, TXT, MP3, or WAV.",
       );
       resetAll({ preserveError: true });
@@ -156,8 +129,8 @@ export function ConverterCard() {
     }
 
     const nextInputFormat = getClientInputFormat(next);
-    const nextCategory = getFileCategory(nextInputFormat);
-    const nextFormats = getAllowedFormats(nextInputFormat);
+    const nextCategory = getFormatCategory(nextInputFormat);
+    const nextFormats = getAllowedFormatOptions(nextInputFormat);
 
     setFile(next);
     setCategory(nextCategory);
@@ -302,7 +275,7 @@ export function ConverterCard() {
     <div className="space-y-4">
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
         <div className="flex items-center justify-between gap-4 text-xs text-zinc-600 dark:text-zinc-300">
-          <span>Single file - Max {formatBytes(MAX_BYTES)} (Phase 1)</span>
+          <span>Single file - Max {formatBytes(MAX_UPLOAD_BYTES)} (Phase 1)</span>
           <span className="font-semibold text-[var(--brand)]">
             Free
           </span>
