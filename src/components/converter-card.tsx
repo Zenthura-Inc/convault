@@ -16,7 +16,7 @@ type ActiveJob = {
   token: string;
 };
 
-type Step = "idle" | "selected" | "converting" | "ready";
+type Step = "idle" | "selected" | "converting" | "ready" | "downloaded";
 
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
@@ -300,6 +300,10 @@ export function ConverterCard() {
       anchor.click();
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      deleteActiveJob(activeJob);
+      setDownloadUrl("");
+      setDownloadName("");
+      setStep("downloaded");
     } catch {
       setError("Download failed. Please try again.");
     } finally {
@@ -310,7 +314,7 @@ export function ConverterCard() {
   const isConverting = step === "converting";
   const canConvert = Boolean(file && outputFormat);
   const progressValue =
-    step === "ready" ? 100 : step === "converting" ? progress : file ? 35 : 10;
+    step === "ready" || step === "downloaded" ? 100 : step === "converting" ? progress : file ? 35 : 10;
 
   return (
     <div className="space-y-4">
@@ -449,7 +453,15 @@ export function ConverterCard() {
             </label>
 
             <div className="flex items-end">
-              {step === "ready" && downloadUrl ? (
+              {step === "downloaded" ? (
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm opacity-70"
+                  disabled
+                >
+                  Downloaded
+                </button>
+              ) : step === "ready" && downloadUrl ? (
                 <button
                   type="button"
                   className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
@@ -485,9 +497,11 @@ export function ConverterCard() {
             </div>
           ) : null}
 
-          {step === "ready" ? (
+          {step === "ready" || step === "downloaded" ? (
             <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-500/30 dark:bg-green-950/30 dark:text-green-100">
-              Conversion complete. Your download is ready.
+              {step === "downloaded"
+                ? "Download started. Server copy cleared."
+                : "Conversion complete. Your download is ready."}
             </div>
           ) : null}
         </div>
