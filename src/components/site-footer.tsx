@@ -1,5 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
+
+import { BrandLogo } from "@/components/brand-logo";
 
 const footerGroups = [
   {
@@ -21,21 +22,7 @@ export function SiteFooter() {
     <footer className="border-t border-[var(--border-subtle)] bg-white dark:bg-zinc-950">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-6 py-10 sm:px-10 md:grid-cols-[1.4fr_1fr_1fr_1fr_1.6fr]">
         <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-3 text-lg font-bold tracking-tight text-[var(--brand)]"
-          >
-            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-              <Image
-                src="/icon-transparent.png"
-                alt=""
-                width={36}
-                height={36}
-                className="h-9 w-9 object-contain"
-              />
-            </span>
-            <span>Convault</span>
-          </Link>
+          <BrandLogo iconSize={36} />
           <p className="mt-4 max-w-64 text-sm leading-6 text-slate-600 dark:text-zinc-300">
             The easiest way to convert files online. Fast, secure, and simple.
           </p>
