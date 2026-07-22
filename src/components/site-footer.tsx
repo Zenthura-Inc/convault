@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const footerGroups = [
@@ -24,9 +25,14 @@ export function SiteFooter() {
             href="/"
             className="inline-flex items-center gap-3 text-lg font-bold tracking-tight text-[var(--brand)]"
           >
-            <span className="relative flex h-9 w-8 items-end justify-center rounded-md bg-[var(--brand)] pb-1 text-[0.52rem] font-black leading-none text-white shadow-sm">
-              CV
-              <span className="absolute right-0 top-0 h-0 w-0 border-l-[9px] border-t-[9px] border-l-purple-200 border-t-white dark:border-l-purple-300 dark:border-t-zinc-950" />
+            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+              <Image
+                src="/icon-transparent.png"
+                alt=""
+                width={36}
+                height={36}
+                className="h-9 w-9 object-contain"
+              />
             </span>
             <span>Convault</span>
           </Link>

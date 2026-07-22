@@ -35,13 +35,10 @@ const steps = [
 
 export default function Home() {
   return (
-    <div className="relative -mx-4 -mt-8 overflow-hidden bg-[var(--background)] sm:-mx-6 sm:-mt-10">
-      <div className="pointer-events-none absolute -right-16 top-0 h-44 w-44 rounded-bl-[5rem] bg-[var(--brand-soft)] dark:opacity-60" />
-      <div className="pointer-events-none absolute -left-24 top-80 h-44 w-56 rounded-tr-[6rem] bg-[var(--brand-soft)] dark:opacity-50" />
-
-      <section className="mx-auto grid w-full max-w-7xl items-center gap-12 px-6 py-16 sm:px-10 lg:grid-cols-[0.92fr_1.08fr] lg:py-24">
-        <div>
-          <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
+    <div className="bg-[var(--background)]">
+      <section className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)] lg:px-8 lg:py-20">
+        <div className="min-w-0">
+          <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem] dark:text-white">
             Convert{" "}
             <span className="text-[var(--brand)]">Convault</span> Files
             Easily & Instantly
@@ -51,13 +48,13 @@ export default function Home() {
             clicks. Convault keeps the workflow simple, fast, and privacy-first.
           </p>
 
-          <div id="features" className="mt-10 grid max-w-2xl scroll-mt-28 gap-5 sm:grid-cols-3">
+          <div id="features" className="mt-10 grid max-w-2xl scroll-mt-28 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {benefits.map((benefit) => (
-              <div key={benefit.title} className="flex gap-3">
+              <div key={benefit.title} className="flex min-w-0 gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-[var(--brand-soft)] text-sm font-bold text-[var(--brand)] dark:border-purple-500/30">
                   {benefit.icon}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-sm font-semibold text-[var(--brand)]">
                     {benefit.title}
                   </h2>
@@ -70,8 +67,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div id="converter" className="scroll-mt-28">
-          <div className="rounded-[1.75rem] border border-dashed border-purple-400 bg-white/80 p-4 shadow-[0_18px_60px_rgb(88_28_135/0.10)] backdrop-blur-sm sm:p-6 dark:border-purple-500/50 dark:bg-zinc-900/80">
+        <div id="converter" className="min-w-0 scroll-mt-28">
+          <div className="rounded-[1.5rem] border border-dashed border-purple-400 bg-white p-3 shadow-[0_18px_50px_rgb(88_28_135/0.08)] sm:p-5 dark:border-purple-500/50 dark:bg-zinc-900">
             <div className="mx-auto max-w-2xl">
               <ConverterCard />
             </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -14,15 +15,21 @@ const navItems = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 w-full border-b border-[var(--border-subtle)] bg-white/95 backdrop-blur dark:bg-zinc-950/95">
-      <div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-6 sm:px-10">
+      <div className="mx-auto flex min-h-[4.5rem] w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link
           href="/"
           className="inline-flex items-center gap-3 rounded-xl py-2 text-lg font-bold tracking-tight text-[var(--brand)]"
           aria-label="Convault home"
         >
-          <span className="relative flex h-10 w-8 items-end justify-center rounded-md bg-[var(--brand)] pb-1 text-[0.55rem] font-black leading-none text-white shadow-sm">
-            CV
-            <span className="absolute right-0 top-0 h-0 w-0 border-l-[10px] border-t-[10px] border-l-purple-200 border-t-white dark:border-l-purple-300 dark:border-t-zinc-950" />
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+            <Image
+              src="/icon-transparent.png"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
+              priority
+            />
           </span>
           <span>Convault</span>
         </Link>
@@ -43,7 +50,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <Link
             href="/#converter"
-            className="hidden h-11 items-center justify-center rounded-lg bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98] sm:inline-flex"
+            className="hidden h-11 items-center justify-center whitespace-nowrap rounded-lg bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98] sm:inline-flex"
           >
             Get Started Free
           </Link>
