@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Convault — Fast File Converter",
+  title: "Convault - Fast File Converter",
   description: "A fast, simple, privacy-first file converter.",
 };
 
