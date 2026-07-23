@@ -192,6 +192,7 @@ export function ConverterCard() {
       const validationResponse = await fetch("/api/uploads/validate", {
         method: "POST",
         body: form,
+        cache: "no-store",
       });
 
       validationPayload = await validationResponse.json().catch(() => null);
@@ -228,6 +229,10 @@ export function ConverterCard() {
       const statusPayload = await statusResponse.json().catch(() => null);
 
       if (!statusResponse.ok || statusPayload?.ok !== true) {
+        deleteActiveJob({
+          id: validationPayload.job.id,
+          token: validationPayload.token,
+        });
         setStep("selected");
         setProgress(35);
         setError("Conversion job could not be verified. Please try again.");
@@ -246,6 +251,10 @@ export function ConverterCard() {
       const processPayload = await processResponse.json().catch(() => null);
 
       if (!processResponse.ok || processPayload?.ok !== true || processPayload.job?.status !== "ready") {
+        deleteActiveJob({
+          id: validationPayload.job.id,
+          token: validationPayload.token,
+        });
         setStep("selected");
         setProgress(35);
         setError(
@@ -286,6 +295,7 @@ export function ConverterCard() {
       });
 
       if (!response.ok) {
+        deleteActiveJob(activeJob);
         setError("Download is no longer available. Please convert the file again.");
         return;
       }
