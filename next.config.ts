@@ -17,7 +17,12 @@ const nextConfig: NextConfig = {
           "base-uri 'self'",
           "form-action 'self'",
           "frame-ancestors 'none'",
+          ...(isProduction ? ["upgrade-insecure-requests"] : []),
         ].join("; "),
+      },
+      {
+        key: "X-Frame-Options",
+        value: "DENY",
       },
       {
         key: "X-Content-Type-Options",
