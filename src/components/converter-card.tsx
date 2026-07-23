@@ -196,6 +196,7 @@ export function ConverterCard() {
       token?: string;
       error?: { message?: string };
     } | null = null;
+    let createdJob: ActiveJob | null = null;
 
     try {
       const validationResponse = await fetch("/api/uploads/validate", {
@@ -223,10 +224,12 @@ export function ConverterCard() {
         return;
       }
 
-      setActiveJob({
+      createdJob = {
         id: validationPayload.job.id,
         token: validationPayload.token,
-      });
+      };
+
+      setActiveJob(createdJob);
 
       const statusResponse = await fetch(`/api/jobs/${encodeURIComponent(validationPayload.job.id)}`, {
         method: "GET",
@@ -278,6 +281,9 @@ export function ConverterCard() {
       setDownloadName(processPayload.job.resultFilename ?? `converted.${outputFormat}`);
       setStep("ready");
     } catch {
+      if (createdJob) {
+        deleteActiveJob(createdJob);
+      }
       setStep("selected");
       setProgress(35);
       setError("File could not be validated. Please check your connection and try again.");

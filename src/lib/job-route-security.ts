@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 
-export const NO_STORE_HEADERS = {
-  "Cache-Control": "no-store",
-};
+import { NO_STORE_HEADERS } from "@/lib/http-headers";
+
+export { NO_STORE_HEADERS };
 
 export function getRequestToken(request: NextRequest) {
   const authorization = request.headers.get("authorization") ?? "";

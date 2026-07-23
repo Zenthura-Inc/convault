@@ -4,6 +4,7 @@ import {
   createConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
+import { NO_STORE_HEADERS } from "@/lib/http-headers";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
   MAX_UPLOAD_BYTES,
@@ -16,9 +17,6 @@ export const runtime = "nodejs";
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
-const NO_STORE_HEADERS = {
-  "Cache-Control": "no-store",
-};
 
 type ErrorCode =
   | "invalid_content_type"
