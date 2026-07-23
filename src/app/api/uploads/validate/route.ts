@@ -68,9 +68,15 @@ export async function POST(request: NextRequest) {
       "RateLimit-Remaining": String(rateLimit.remaining),
       "RateLimit-Reset": String(Math.ceil(rateLimit.resetAt / 1000)),
     };
+    const rateLimitedError = (
+      status: number,
+      code: ErrorCode,
+      message: string,
+      headers?: HeadersInit,
+    ) => jsonError(status, code, message, { ...rateLimitHeaders, ...headers });
 
     if (!rateLimit.allowed) {
-      return jsonError(
+      return rateLimitedError(
         429,
         "rate_limited",
         "Too many upload attempts. Please wait a moment and try again.",
@@ -83,43 +89,43 @@ export async function POST(request: NextRequest) {
 
     const contentType = request.headers.get("content-type") ?? "";
     if (!contentType.toLowerCase().startsWith("multipart/form-data")) {
-      return jsonError(415, "invalid_content_type", "Upload must use multipart form data.");
+      return rateLimitedError(415, "invalid_content_type", "Upload must use multipart form data.");
     }
 
     const contentLength = request.headers.get("content-length");
     if (!contentLength) {
-      return jsonError(411, "missing_content_length", "Upload size is required.");
+      return rateLimitedError(411, "missing_content_length", "Upload size is required.");
     }
 
     const requestBytes = Number(contentLength);
     if (!Number.isSafeInteger(requestBytes) || requestBytes <= 0) {
-      return jsonError(400, "invalid_file", "Upload size is invalid.");
+      return rateLimitedError(400, "invalid_file", "Upload size is invalid.");
     }
 
     if (requestBytes > MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES) {
-      return jsonError(413, "file_too_large", "File is too large for the free converter.");
+      return rateLimitedError(413, "file_too_large", "File is too large for the free converter.");
     }
 
     const form = await request.formData();
     const file = form.get("file");
 
     if (!(file instanceof File)) {
-      return jsonError(400, "missing_file", "Please upload one file.");
+      return rateLimitedError(400, "missing_file", "Please upload one file.");
     }
 
     if (file.size <= 0) {
-      return jsonError(400, "invalid_file", "Uploaded file is empty.");
+      return rateLimitedError(400, "invalid_file", "Uploaded file is empty.");
     }
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      return jsonError(413, "file_too_large", "File is too large for the free converter.");
+      return rateLimitedError(413, "file_too_large", "File is too large for the free converter.");
     }
 
     const bytes = new Uint8Array(await file.arrayBuffer());
     const validation = validateUploadBytes(bytes);
 
     if (!validation) {
-      return jsonError(
+      return rateLimitedError(
         415,
         "unsupported_file",
         "Unsupported or ambiguous file type. Try JPG, PNG, WEBP, GIF, PDF, TXT, MP3, or WAV.",
@@ -128,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     const outputFormat = String(form.get("outputFormat") ?? "").toLowerCase();
     if (!validation.allowedOutputs.some((allowedOutput) => allowedOutput === outputFormat)) {
-      return jsonError(400, "unsupported_output", "Selected output format is not supported for this file.");
+      return rateLimitedError(400, "unsupported_output", "Selected output format is not supported for this file.");
     }
 
     const job = createConversionJob({
