@@ -55,6 +55,8 @@ function isAllowedFile(file: File) {
 
 export function ConverterCard() {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const conversionInFlightRef = React.useRef(false);
+  const downloadInFlightRef = React.useRef(false);
   const [dragActive, setDragActive] = React.useState(false);
   const [step, setStep] = React.useState<Step>("idle");
   const [file, setFile] = React.useState<File | null>(null);
@@ -101,6 +103,8 @@ export function ConverterCard() {
   }
 
   function resetAll(options: { preserveError?: boolean } = {}) {
+    conversionInFlightRef.current = false;
+    downloadInFlightRef.current = false;
     deleteActiveJob();
     setStep("idle");
     setFile(null);
@@ -158,6 +162,10 @@ export function ConverterCard() {
   }
 
   async function startConvert() {
+    if (conversionInFlightRef.current || step === "converting") {
+      return;
+    }
+
     if (!file) {
       setError("Please upload a file first.");
       return;
@@ -171,6 +179,7 @@ export function ConverterCard() {
     setError("");
     setStep("converting");
     setProgress(8);
+    conversionInFlightRef.current = true;
 
     const form = new FormData();
     form.append("file", file);
@@ -273,15 +282,22 @@ export function ConverterCard() {
       setProgress(35);
       setError("File could not be validated. Please check your connection and try again.");
       return;
+    } finally {
+      conversionInFlightRef.current = false;
     }
   }
 
   async function downloadResult() {
+    if (downloadInFlightRef.current) {
+      return;
+    }
+
     if (!downloadUrl || !downloadName || !activeJob) {
       setError("Download is not ready yet. Please convert the file again.");
       return;
     }
 
+    downloadInFlightRef.current = true;
     setDownloading(true);
     setError("");
 
@@ -317,6 +333,7 @@ export function ConverterCard() {
     } catch {
       setError("Download failed. Please try again.");
     } finally {
+      downloadInFlightRef.current = false;
       setDownloading(false);
     }
   }

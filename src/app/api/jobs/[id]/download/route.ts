@@ -38,9 +38,7 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
       ...NO_STORE_HEADERS,
       "Content-Type": result.mimeType,
       "Content-Length": String(result.bytes.byteLength),
-      "Content-Disposition": `attachment; filename="${escapeContentDispositionFilename(
-        result.filename,
-      )}"`,
+      "Content-Disposition": contentDispositionAttachment(result.filename),
       "X-Content-Type-Options": "nosniff",
     },
   });
@@ -50,6 +48,17 @@ function resultNotFound() {
   return jobNotFound("Converted file was not found or has expired.");
 }
 
-function escapeContentDispositionFilename(filename: string) {
-  return filename.replace(/["\\\r\n]/g, "_");
+function contentDispositionAttachment(filename: string) {
+  const fallback = filename
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7e]+/g, "_")
+    .replace(/["\\\r\n]/g, "_")
+    .slice(0, 120) || "converted-file";
+  const encoded = encodeURIComponent(filename).replace(/['()]/g, escapeContentDispositionChar);
+
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+}
+
+function escapeContentDispositionChar(value: string) {
+  return `%${value.charCodeAt(0).toString(16).toUpperCase()}`;
 }

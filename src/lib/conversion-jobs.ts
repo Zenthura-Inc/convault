@@ -81,6 +81,7 @@ export function getAuthorizedConversionJob(id: string, token: string) {
   }
 
   if (Date.parse(job.expiresAt) <= Date.now()) {
+    disposeJob(job);
     jobs.delete(job.id);
     return {
       ...job,
@@ -140,8 +141,7 @@ export function deleteAuthorizedConversionJob(id: string, token: string) {
     return false;
   }
 
-  job.sourceBytes = new Uint8Array();
-  job.resultBytes = undefined;
+  disposeJob(job);
   jobs.delete(id);
   return true;
 }
@@ -265,6 +265,7 @@ function cleanupExpiredJobs() {
 
   for (const [id, job] of jobs) {
     if (Date.parse(job.expiresAt) <= now) {
+      disposeJob(job);
       jobs.delete(id);
     }
   }
@@ -293,12 +294,14 @@ function deleteOldestJob() {
   const oldestKey = jobs.keys().next().value;
   if (!oldestKey) return false;
   const oldestJob = jobs.get(oldestKey);
-  if (oldestJob) {
-    oldestJob.sourceBytes = new Uint8Array();
-    oldestJob.resultBytes = undefined;
-  }
+  if (oldestJob) disposeJob(oldestJob);
   jobs.delete(oldestKey);
   return true;
+}
+
+function disposeJob(job: ConversionJob) {
+  job.sourceBytes = new Uint8Array();
+  job.resultBytes = undefined;
 }
 
 function isTokenMatch(expected: string, received: string) {

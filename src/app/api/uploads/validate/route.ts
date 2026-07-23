@@ -26,6 +26,7 @@ type ErrorCode =
   | "file_too_large"
   | "missing_file"
   | "invalid_file"
+  | "invalid_form"
   | "unsupported_file"
   | "unsupported_output"
   | "rate_limited"
@@ -88,7 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     const contentType = request.headers.get("content-type") ?? "";
-    if (!contentType.toLowerCase().startsWith("multipart/form-data")) {
+    const mediaType = contentType.split(";", 1)[0]?.trim().toLowerCase();
+    if (mediaType !== "multipart/form-data") {
       return rateLimitedError(415, "invalid_content_type", "Upload must use multipart form data.");
     }
 
@@ -107,10 +109,22 @@ export async function POST(request: NextRequest) {
     }
 
     const form = await request.formData();
-    const file = form.get("file");
+    const files = form.getAll("file");
+    const outputFormats = form.getAll("outputFormat");
+
+    if (files.length !== 1 || outputFormats.length !== 1) {
+      return rateLimitedError(400, "invalid_form", "Upload must include one file and one output format.");
+    }
+
+    const file = files[0];
+    const outputFormatValue = outputFormats[0];
 
     if (!(file instanceof File)) {
       return rateLimitedError(400, "missing_file", "Please upload one file.");
+    }
+
+    if (typeof outputFormatValue !== "string") {
+      return rateLimitedError(400, "unsupported_output", "Selected output format is invalid.");
     }
 
     if (file.size <= 0) {
@@ -132,7 +146,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const outputFormat = String(form.get("outputFormat") ?? "").toLowerCase();
+    const outputFormat = outputFormatValue.trim().toLowerCase();
     if (!validation.allowedOutputs.some((allowedOutput) => allowedOutput === outputFormat)) {
       return rateLimitedError(400, "unsupported_output", "Selected output format is not supported for this file.");
     }

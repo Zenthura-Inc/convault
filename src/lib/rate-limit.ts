@@ -20,6 +20,7 @@ type MemoryBucket = {
 };
 
 const memoryBuckets = new Map<string, MemoryBucket>();
+const REDIS_COMMAND_TIMEOUT_MS = 1500;
 
 export async function checkRateLimit({
   key,
@@ -159,6 +160,7 @@ async function redisCommand<T>(
     },
     body: JSON.stringify(command),
     cache: "no-store",
+    signal: AbortSignal.timeout(REDIS_COMMAND_TIMEOUT_MS),
   });
 
   if (!response.ok) {
