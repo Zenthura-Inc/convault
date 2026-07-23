@@ -4,11 +4,11 @@ import {
   processAuthorizedConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
+import { jsonApiResponse } from "@/lib/api-responses";
 import {
   getRequestToken,
   isValidJobIdentifier,
   jobNotFound,
-  NO_STORE_HEADERS,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest, context: JobRouteContext) {
     return jobNotFound();
   }
 
-  return Response.json(
+  return jsonApiResponse(
     {
       ok: job.status !== "failed",
       job: toPublicConversionJob(job),
@@ -44,9 +44,6 @@ export async function POST(request: NextRequest, context: JobRouteContext) {
             }
           : undefined,
     },
-    {
-      status: job.status === "failed" ? 422 : 200,
-      headers: NO_STORE_HEADERS,
-    },
+    { status: job.status === "failed" ? 422 : 200 },
   );
 }

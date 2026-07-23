@@ -5,11 +5,11 @@ import {
   getAuthorizedConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
+import { jsonApiOk } from "@/lib/api-responses";
 import {
   getRequestToken,
   isValidJobIdentifier,
   jobNotFound,
-  NO_STORE_HEADERS,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
@@ -33,13 +33,9 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
     return jobNotFound();
   }
 
-  return Response.json(
+  return jsonApiOk(
     {
-      ok: true,
       job: toPublicConversionJob(job),
-    },
-    {
-      headers: NO_STORE_HEADERS,
     },
   );
 }
@@ -57,12 +53,5 @@ export async function DELETE(request: NextRequest, context: JobRouteContext) {
     return jobNotFound();
   }
 
-  return Response.json(
-    {
-      ok: true,
-    },
-    {
-      headers: NO_STORE_HEADERS,
-    },
-  );
+  return jsonApiOk({});
 }

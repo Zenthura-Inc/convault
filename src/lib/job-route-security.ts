@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 
+import { jsonApiError } from "@/lib/api-responses";
 import { NO_STORE_HEADERS } from "@/lib/http-headers";
 
 export { NO_STORE_HEADERS };
@@ -20,17 +21,5 @@ export function isValidJobIdentifier(value: string) {
 }
 
 export function jobNotFound(message = "Conversion job was not found or has expired.") {
-  return Response.json(
-    {
-      ok: false,
-      error: {
-        code: "not_found",
-        message,
-      },
-    },
-    {
-      status: 404,
-      headers: NO_STORE_HEADERS,
-    },
-  );
+  return jsonApiError(404, "not_found", message);
 }

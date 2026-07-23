@@ -4,7 +4,7 @@ import {
   createConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
-import { NO_STORE_HEADERS } from "@/lib/http-headers";
+import { jsonApiError, jsonApiOk } from "@/lib/api-responses";
 import { checkRateLimit } from "@/lib/rate-limit";
 import {
   MAX_UPLOAD_BYTES,
@@ -36,22 +36,7 @@ function jsonError(
   message: string,
   headers?: HeadersInit,
 ) {
-  return Response.json(
-    {
-      ok: false,
-      error: {
-        code,
-        message,
-      },
-    },
-    {
-      status,
-      headers: {
-        ...NO_STORE_HEADERS,
-        ...headers,
-      },
-    },
-  );
+  return jsonApiError(status, code, message, headers);
 }
 
 export async function POST(request: NextRequest) {
@@ -158,19 +143,13 @@ export async function POST(request: NextRequest) {
       sourceBytes: bytes,
     });
 
-    return Response.json(
+    return jsonApiOk(
       {
-        ok: true,
         job: toPublicConversionJob(job),
         token: job.token,
         allowedOutputs: validation.allowedOutputs,
       },
-      {
-        headers: {
-          ...NO_STORE_HEADERS,
-          ...rateLimitHeaders,
-        },
-      },
+      rateLimitHeaders,
     );
   } catch {
     return jsonError(500, "internal_error", "Upload could not be validated.");
