@@ -12,7 +12,7 @@ export function getRequestToken(request: NextRequest) {
     return token;
   }
 
-  return request.nextUrl.searchParams.get("token") ?? "";
+  return "";
 }
 
 export function isValidJobIdentifier(value: string) {
