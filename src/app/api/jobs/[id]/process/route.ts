@@ -5,7 +5,7 @@ import {
   processAuthorizedConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
-import { jsonApiResponse } from "@/lib/api-responses";
+import { jsonApiResponse, type JsonApiResponseBody } from "@/lib/api-responses";
 import {
   getAuthorizedJobRouteParams,
   jobNotFound,
@@ -24,18 +24,17 @@ export async function POST(request: NextRequest, context: JobRouteContext) {
     return jobNotFound();
   }
 
-  return jsonApiResponse(
-    {
-      ok: job.status !== "failed",
-      job: toPublicConversionJob(job),
-      error:
-        job.status === "failed"
-          ? {
-              code: "conversion_failed",
-              message: job.failureReason ?? "Conversion failed.",
-            }
-          : undefined,
-    },
-    { status: job.status === "failed" ? 422 : 200 },
-  );
+  const body: JsonApiResponseBody = {
+    ok: job.status !== "failed",
+    job: toPublicConversionJob(job),
+    error:
+      job.status === "failed"
+        ? {
+            code: "conversion_failed",
+            message: job.failureReason ?? "Conversion failed.",
+          }
+        : undefined,
+  };
+
+  return jsonApiResponse(body, { status: job.status === "failed" ? 422 : 200 });
 }

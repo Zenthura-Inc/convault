@@ -30,15 +30,6 @@ type ErrorCode =
   | "rate_limited"
   | "internal_error";
 
-function jsonError(
-  status: number,
-  code: ErrorCode,
-  message: string,
-  headers?: HeadersInit,
-) {
-  return jsonApiError(status, code, message, headers);
-}
-
 export async function POST(request: NextRequest) {
   try {
     const rateLimit = await checkRateLimit({
@@ -57,7 +48,7 @@ export async function POST(request: NextRequest) {
       code: ErrorCode,
       message: string,
       headers?: HeadersInit,
-    ) => jsonError(status, code, message, { ...rateLimitHeaders, ...headers });
+    ) => jsonApiError<ErrorCode>(status, code, message, { ...rateLimitHeaders, ...headers });
 
     if (!rateLimit.allowed) {
       return rateLimitedError(
@@ -152,7 +143,7 @@ export async function POST(request: NextRequest) {
       rateLimitHeaders,
     );
   } catch {
-    return jsonError(500, "internal_error", "Upload could not be validated.");
+    return jsonApiError<ErrorCode>(500, "internal_error", "Upload could not be validated.");
   }
 }
 

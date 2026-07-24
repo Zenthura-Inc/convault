@@ -5,10 +5,24 @@ type JsonApiResponseOptions = {
   headers?: HeadersInit;
 };
 
+type JsonObject = Record<string, unknown>;
+
+export type JsonApiResponseBody = JsonObject & {
+  ok: boolean;
+};
+
+type JsonApiErrorBody<TCode extends string = string> = {
+  ok: false;
+  error: {
+    code: TCode;
+    message: string;
+  };
+};
+
 export function jsonApiResponse(
-  body: unknown,
+  body: JsonApiResponseBody,
   options: JsonApiResponseOptions = {},
-) {
+): Response {
   return Response.json(body, {
     status: options.status,
     headers: {
@@ -18,7 +32,7 @@ export function jsonApiResponse(
   });
 }
 
-export function jsonApiOk(body: Record<string, unknown>, headers?: HeadersInit) {
+export function jsonApiOk(body: JsonObject, headers?: HeadersInit): Response {
   return jsonApiResponse(
     {
       ok: true,
@@ -28,20 +42,22 @@ export function jsonApiOk(body: Record<string, unknown>, headers?: HeadersInit) 
   );
 }
 
-export function jsonApiError(
+export function jsonApiError<TCode extends string = string>(
   status: number,
-  code: string,
+  code: TCode,
   message: string,
   headers?: HeadersInit,
-) {
-  return jsonApiResponse(
-    {
-      ok: false,
-      error: {
-        code,
-        message,
-      },
+): Response {
+  const body: JsonApiErrorBody<TCode> = {
+    ok: false,
+    error: {
+      code,
+      message,
     },
+  };
+
+  return jsonApiResponse(
+    body,
     { status, headers },
   );
 }
