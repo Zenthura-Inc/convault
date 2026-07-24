@@ -1,30 +1,22 @@
 import type { NextRequest } from "next/server";
+import type { JobRouteContext } from "@/lib/job-route-security";
 
 import { getAuthorizedConversionResult } from "@/lib/conversion-jobs";
 import { NO_STORE_HEADERS } from "@/lib/http-headers";
 import {
-  getRequestToken,
-  isValidJobIdentifier,
+  getAuthorizedJobRouteParams,
   jobNotFound,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
 
-type JobRouteContext = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
 export async function GET(request: NextRequest, context: JobRouteContext) {
-  const { id } = await context.params;
-  const token = getRequestToken(request);
-
-  if (!isValidJobIdentifier(id) || !isValidJobIdentifier(token)) {
+  const routeParams = await getAuthorizedJobRouteParams(request, context);
+  if (!routeParams) {
     return resultNotFound();
   }
 
-  const result = getAuthorizedConversionResult(id, token);
+  const result = getAuthorizedConversionResult(routeParams.id, routeParams.token);
   if (!result) {
     return resultNotFound();
   }

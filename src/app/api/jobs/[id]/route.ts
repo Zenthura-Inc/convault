@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import type { JobRouteContext } from "@/lib/job-route-security";
 
 import {
   deleteAuthorizedConversionJob,
@@ -7,28 +8,19 @@ import {
 } from "@/lib/conversion-jobs";
 import { jsonApiOk } from "@/lib/api-responses";
 import {
-  getRequestToken,
-  isValidJobIdentifier,
+  getAuthorizedJobRouteParams,
   jobNotFound,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
 
-type JobRouteContext = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
 export async function GET(request: NextRequest, context: JobRouteContext) {
-  const { id } = await context.params;
-  const token = getRequestToken(request);
-
-  if (!isValidJobIdentifier(id) || !isValidJobIdentifier(token)) {
+  const routeParams = await getAuthorizedJobRouteParams(request, context);
+  if (!routeParams) {
     return jobNotFound();
   }
 
-  const job = getAuthorizedConversionJob(id, token);
+  const job = getAuthorizedConversionJob(routeParams.id, routeParams.token);
   if (!job) {
     return jobNotFound();
   }
@@ -41,14 +33,12 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: JobRouteContext) {
-  const { id } = await context.params;
-  const token = getRequestToken(request);
-
-  if (!isValidJobIdentifier(id) || !isValidJobIdentifier(token)) {
+  const routeParams = await getAuthorizedJobRouteParams(request, context);
+  if (!routeParams) {
     return jobNotFound();
   }
 
-  const deleted = deleteAuthorizedConversionJob(id, token);
+  const deleted = deleteAuthorizedConversionJob(routeParams.id, routeParams.token);
   if (!deleted) {
     return jobNotFound();
   }

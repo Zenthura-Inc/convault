@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import type { JobRouteContext } from "@/lib/job-route-security";
 
 import {
   processAuthorizedConversionJob,
@@ -6,28 +7,19 @@ import {
 } from "@/lib/conversion-jobs";
 import { jsonApiResponse } from "@/lib/api-responses";
 import {
-  getRequestToken,
-  isValidJobIdentifier,
+  getAuthorizedJobRouteParams,
   jobNotFound,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
 
-type JobRouteContext = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
 export async function POST(request: NextRequest, context: JobRouteContext) {
-  const { id } = await context.params;
-  const token = getRequestToken(request);
-
-  if (!isValidJobIdentifier(id) || !isValidJobIdentifier(token)) {
+  const routeParams = await getAuthorizedJobRouteParams(request, context);
+  if (!routeParams) {
     return jobNotFound();
   }
 
-  const job = processAuthorizedConversionJob(id, token);
+  const job = processAuthorizedConversionJob(routeParams.id, routeParams.token);
   if (!job) {
     return jobNotFound();
   }
