@@ -1,108 +1,106 @@
-# Convault — Modern File Converter (Next.js + Supabase + CloudConvert)
+# Convault
 
-A fast, minimalist SaaS-style file converter web app.
+Convault is a privacy-first file converter built with Next.js App Router.
 
-Flow:
-**Upload → Select format → Convert → Download**
+Current phase: **Phase 1 - core converter and security hardening**.
 
-- **Anonymous usage** supported (no login required for basic conversions)
-- **Optional accounts** via Supabase Auth
-- **Temporary storage** with privacy-first auto-deletion (scheduled cleanup)
-- **CloudConvert** handles conversions (images, documents, audio, video)
-- **Premium (Coming Soon)** UI only — no payments/subscriptions implemented
+## Current Capabilities
 
----
+- Upload one file at a time.
+- Validate file type using server-side byte checks.
+- Convert supported same-format files for download.
+- Convert TXT to a simple PDF.
+- Protect conversion jobs with bearer tokens.
+- Delete temporary server jobs after download, reset, failure, expiry, or eviction.
+- Rate-limit upload validation with an in-memory fallback and optional Redis REST store.
+- Support light and dark mode.
 
-## Tech Stack
+## Supported Formats
 
-### Frontend
-- **Next.js (App Router)**
-- **React**
-- **Tailwind CSS**
-- (Optional) UI helpers: class-variance-authority, tailwind-merge, lucide-react
+Current upload formats:
 
-### Backend
-- **Next.js Route Handlers** (`/app/api/...`)
-- **Supabase**
-  - Auth (optional)
-  - Postgres database (conversion metadata)
-  - Storage (original + converted files)
-- **CloudConvert API** (server-side integration)
+- JPG
+- PNG
+- WEBP
+- GIF
+- PDF
+- TXT
+- MP3
+- WAV
 
-### Key Features
-- Drag-and-drop uploader + file picker
-- Output format selection based on input type
-- Upload + conversion progress feedback
-- Instant download link after conversion
-- Auto-deletion after a short time (privacy-first)
-- Dashboard conversion history for logged-in users (temporary access)
+Current conversion support is intentionally limited in Phase 1. Broader real conversion support belongs in Phase 2.
 
----
+## Requirements
 
-## Supported Formats (Planned / Target)
+- Node.js `>=20.9.0`
+- npm `11.13.0`
 
-**Images**
-- Input: JPG, PNG, WEBP, GIF
-- Output: JPG, PNG, WEBP (GIF support depends on conversion type)
+The project includes `.node-version` and `.npmrc` with `engine-strict=true`, so unsupported Node versions fail during install.
 
-**Documents**
-- Input: PDF, DOCX, TXT
-- Output: PDF, DOCX, TXT (where supported by CloudConvert)
+## Environment
 
-**Audio**
-- Input: MP3, WAV
-- Output: MP3, WAV
+Local development can run without environment variables.
 
-**Video**
-- Input: MP4, MOV, AVI
-- Output: MP4, MOV, AVI
+Optional production rate-limit store:
 
-> Actual supported conversions may be phased in gradually to keep the system stable.
-
----
-
-## Pages
-- **Home**: main converter UI
-- **Pricing**: “Coming Soon” premium plan (informational only)
-- **Dashboard**: conversion history for logged-in users
-- **About / Privacy**: security + auto-deletion policy
-
----
-
-## Messaging (Premium Not Yet Implemented)
-
-We’re currently focused on delivering a fast, simple, and reliable file conversion experience for everyone — completely free.
-
-In the future, we plan to introduce a Premium subscription designed for users who need more power, speed, and flexibility.
-
-**Premium features are not yet implemented.** For now, all core tools remain free while we continue improving the platform.
-
----
-
-## Getting Started (Local Development)
-
-### 1) Prerequisites
-- **Node.js 18+**
-- A **Supabase** project
-- A **CloudConvert** API key
-
-### 2) Install dependencies
-```bash
-npm install
+```env
+RATE_LIMIT_REDIS_REST_URL=
+RATE_LIMIT_REDIS_REST_TOKEN=
 ```
 
-### 3) Run dev server
+Leave these unset locally. When unset, Convault uses an in-memory limiter.
+
+## Install
+
+```bash
+npm ci
+```
+
+Use `npm install` only when intentionally changing dependencies.
+
+## Run
+
 ```bash
 npm run dev
 ```
 
 Open:
-- http://localhost:3000
 
-### Scripts
-```bash
-npm run dev       # Start dev server
-npm run build     # Production build
-npm run start     # Start production server
-npm run lint      # Lint
+```text
+http://localhost:3000
 ```
+
+## Verify
+
+Run the full project check before committing or deploying:
+
+```bash
+npm run check
+```
+
+This runs:
+
+- `npm run lint`
+- `npm run audit`
+- `npm run build`
+
+## Scripts
+
+```bash
+npm run dev      # Start local development server
+npm run build    # Build production output
+npm run start    # Start production server
+npm run lint     # Run ESLint
+npm run audit    # Run npm audit at low threshold
+npm run check    # Run lint, audit, and build
+```
+
+## Phase 2 Direction
+
+Planned next phase work:
+
+- Add a real conversion engine or external conversion provider.
+- Replace in-memory jobs with durable storage.
+- Add persistence for conversion metadata.
+- Add account/dashboard behavior if needed.
+- Add automated tests for upload, job auth, processing, and download flows.

@@ -1,11 +1,11 @@
 import type { NextRequest } from "next/server";
 
 import { getAuthorizedConversionResult } from "@/lib/conversion-jobs";
+import { NO_STORE_HEADERS } from "@/lib/http-headers";
 import {
   getRequestToken,
   isValidJobIdentifier,
   jobNotFound,
-  NO_STORE_HEADERS,
 } from "@/lib/job-route-security";
 
 export const runtime = "nodejs";
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
       "Content-Length": String(result.bytes.byteLength),
       "Content-Disposition": contentDispositionAttachment(result.filename),
       "X-Content-Type-Options": "nosniff",
+      "X-Download-Options": "noopen",
     },
   });
 }

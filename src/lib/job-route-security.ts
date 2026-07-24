@@ -1,15 +1,12 @@
 import type { NextRequest } from "next/server";
 
 import { jsonApiError } from "@/lib/api-responses";
-import { NO_STORE_HEADERS } from "@/lib/http-headers";
-
-export { NO_STORE_HEADERS };
 
 export function getRequestToken(request: NextRequest) {
-  const authorization = request.headers.get("authorization") ?? "";
-  const [scheme, token] = authorization.split(/\s+/, 2);
+  const parts = (request.headers.get("authorization") ?? "").trim().split(/\s+/);
+  const [scheme, token] = parts;
 
-  if (scheme?.toLowerCase() === "bearer" && token) {
+  if (parts.length === 2 && scheme?.toLowerCase() === "bearer" && token) {
     return token;
   }
 
@@ -17,7 +14,7 @@ export function getRequestToken(request: NextRequest) {
 }
 
 export function isValidJobIdentifier(value: string) {
-  return /^[0-9a-f-]{36}$/i.test(value);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 export function jobNotFound(message = "Conversion job was not found or has expired.") {
