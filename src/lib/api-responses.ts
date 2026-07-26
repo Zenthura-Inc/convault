@@ -7,6 +7,10 @@ type JsonApiResponseOptions = {
 
 type JsonObject = Record<string, unknown>;
 
+type JsonApiOkPayload = JsonObject & {
+  ok?: never;
+};
+
 export type JsonApiResponseBody = JsonObject & {
   ok: boolean;
 };
@@ -32,11 +36,11 @@ export function jsonApiResponse(
   });
 }
 
-export function jsonApiOk(body: JsonObject, headers?: HeadersInit): Response {
+export function jsonApiOk(body: JsonApiOkPayload, headers?: HeadersInit): Response {
   return jsonApiResponse(
     {
-      ok: true,
       ...body,
+      ok: true,
     },
     { headers },
   );
