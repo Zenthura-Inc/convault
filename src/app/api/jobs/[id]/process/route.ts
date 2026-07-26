@@ -6,6 +6,7 @@ import {
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
 import { jsonApiResponse, type JsonApiResponseBody } from "@/lib/api-responses";
+import { requireSameOriginRequest } from "@/lib/request-origin";
 import {
   getAuthorizedJobRouteParams,
   jobNotFound,
@@ -14,6 +15,9 @@ import {
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest, context: JobRouteContext) {
+  const originError = requireSameOriginRequest(request);
+  if (originError) return originError;
+
   const routeParams = await getAuthorizedJobRouteParams(request, context);
   if (!routeParams) {
     return jobNotFound();

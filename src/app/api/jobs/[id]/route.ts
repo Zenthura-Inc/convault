@@ -7,6 +7,7 @@ import {
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
 import { jsonApiOk } from "@/lib/api-responses";
+import { requireSameOriginRequest } from "@/lib/request-origin";
 import {
   getAuthorizedJobRouteParams,
   jobNotFound,
@@ -33,6 +34,9 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
 }
 
 export async function DELETE(request: NextRequest, context: JobRouteContext) {
+  const originError = requireSameOriginRequest(request);
+  if (originError) return originError;
+
   const routeParams = await getAuthorizedJobRouteParams(request, context);
   if (!routeParams) {
     return jobNotFound();

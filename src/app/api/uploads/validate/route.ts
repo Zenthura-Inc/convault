@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 import type { NextRequest } from "next/server";
 
 import {
@@ -6,6 +8,7 @@ import {
 } from "@/lib/conversion-jobs";
 import { jsonApiError, jsonApiOk } from "@/lib/api-responses";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireSameOriginRequest } from "@/lib/request-origin";
 import {
   MAX_UPLOAD_BYTES,
   sanitizeDisplayFilename,
@@ -32,6 +35,9 @@ type ErrorCode =
 
 export async function POST(request: NextRequest) {
   try {
+    const originError = requireSameOriginRequest(request);
+    if (originError) return originError;
+
     const rateLimit = await checkRateLimit({
       key: getClientKey(request),
       limit: RATE_LIMIT_MAX_REQUESTS,
@@ -148,7 +154,20 @@ export async function POST(request: NextRequest) {
 }
 
 function getClientKey(request: NextRequest) {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = request.headers.get("x-real-ip")?.trim();
+  const forwardedFor = request.headers
+    .get("x-forwarded-for")
+    ?.split(",")
+    .map((value) => value.trim())
+    .find(isValidIpAddress);
+  const realIp = getValidIpAddress(request.headers.get("x-real-ip")?.trim());
+
   return forwardedFor || realIp || "anonymous";
+}
+
+function isValidIpAddress(value: string | undefined) {
+  return value ? isIP(value) !== 0 : false;
+}
+
+function getValidIpAddress(value: string | undefined) {
+  return isValidIpAddress(value) ? value : undefined;
 }

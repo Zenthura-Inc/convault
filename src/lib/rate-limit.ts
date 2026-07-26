@@ -21,6 +21,8 @@ type MemoryBucket = {
 
 const memoryBuckets = new Map<string, MemoryBucket>();
 const REDIS_COMMAND_TIMEOUT_MS = 1500;
+const MAX_MEMORY_BUCKETS = 5_000;
+const MAX_RATE_LIMIT_KEY_LENGTH = 256;
 
 export async function checkRateLimit({
   key,
@@ -47,7 +49,11 @@ export async function checkRateLimit({
 }
 
 function hashRateLimitKey(key: string) {
-  return createHash("sha256").update(key).digest("hex");
+  return createHash("sha256").update(normalizeRateLimitKey(key)).digest("hex");
+}
+
+function normalizeRateLimitKey(key: string) {
+  return key.trim().slice(0, MAX_RATE_LIMIT_KEY_LENGTH) || "anonymous";
 }
 
 function checkMemoryRateLimit({
@@ -65,6 +71,7 @@ function checkMemoryRateLimit({
 
   if (!bucket || bucket.resetAt <= now) {
     const resetAt = now + windowMs;
+    enforceMemoryBucketLimit();
     memoryBuckets.set(key, { count: 1, resetAt });
 
     return {
@@ -93,6 +100,14 @@ function checkMemoryRateLimit({
     resetAt: bucket.resetAt,
     store: "memory",
   };
+}
+
+function enforceMemoryBucketLimit() {
+  while (memoryBuckets.size >= MAX_MEMORY_BUCKETS) {
+    const oldestKey = memoryBuckets.keys().next().value;
+    if (!oldestKey) return;
+    memoryBuckets.delete(oldestKey);
+  }
 }
 
 async function checkRedisRestRateLimit({
