@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' blob: data:",
           "font-src 'self'",
+          "connect-src 'self'",
+          "media-src 'self' blob:",
+          "worker-src 'self' blob:",
+          "frame-src 'none'",
+          "manifest-src 'self'",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
@@ -27,6 +32,14 @@ const nextConfig: NextConfig = {
       {
         key: "X-Content-Type-Options",
         value: "nosniff",
+      },
+      {
+        key: "X-DNS-Prefetch-Control",
+        value: "off",
+      },
+      {
+        key: "X-Permitted-Cross-Domain-Policies",
+        value: "none",
       },
       {
         key: "Referrer-Policy",

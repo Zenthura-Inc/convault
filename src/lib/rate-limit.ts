@@ -30,22 +30,41 @@ export async function checkRateLimit({
   windowMs,
 }: RateLimitOptions): Promise<RateLimitResult> {
   const hashedKey = hashRateLimitKey(key);
-  const redisUrl = process.env.RATE_LIMIT_REDIS_REST_URL;
-  const redisToken = process.env.RATE_LIMIT_REDIS_REST_TOKEN;
+  const redisConfig = getRedisRestConfig();
 
-  if (redisUrl && redisToken) {
+  if (redisConfig) {
     const redisResult = await checkRedisRestRateLimit({
       key: hashedKey,
       limit,
       windowMs,
-      redisUrl,
-      redisToken,
+      redisUrl: redisConfig.url,
+      redisToken: redisConfig.token,
     });
 
     if (redisResult) return redisResult;
   }
 
   return checkMemoryRateLimit({ key: hashedKey, limit, windowMs });
+}
+
+function getRedisRestConfig() {
+  const url = process.env.RATE_LIMIT_REDIS_REST_URL?.trim();
+  const token = process.env.RATE_LIMIT_REDIS_REST_TOKEN?.trim();
+
+  if (!url || !token) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== "https:") {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return { url, token };
 }
 
 function hashRateLimitKey(key: string) {
