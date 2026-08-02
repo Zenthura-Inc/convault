@@ -11,6 +11,7 @@ import {
   type FileCategory,
   type SupportedUploadFormat,
 } from "@/lib/conversion-capabilities";
+import { sanitizeUploadFilename } from "@/lib/filename-sanitization";
 
 type ActiveJob = {
   id: string;
@@ -30,6 +31,10 @@ function formatBytes(bytes: number) {
   }
 
   return `${value.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function getDisplayFilename(file: File) {
+  return sanitizeUploadFilename(file.name);
 }
 
 function getClientInputFormat(file: File): SupportedUploadFormat | null {
@@ -448,7 +453,7 @@ export function ConverterCard() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                {file.name}
+                {getDisplayFilename(file)}
               </p>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
                 {formatBytes(file.size)} - {category}

@@ -18,7 +18,6 @@ export type FormatOption = {
 };
 
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-export const ACCEPTED_FILE_TYPES = ".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.mp3,.wav";
 
 export const OUTPUTS_BY_FORMAT: Record<SupportedUploadFormat, readonly SupportedUploadFormat[]> = {
   jpg: ["jpg"],
@@ -83,6 +82,17 @@ const FORMAT_ALIASES = {
   }
 >;
 
+const CATEGORY_BY_FORMAT: Record<SupportedUploadFormat, Exclude<FileCategory, "unknown">> = {
+  jpg: "image",
+  png: "image",
+  webp: "image",
+  gif: "image",
+  pdf: "document",
+  txt: "document",
+  mp3: "audio",
+  wav: "audio",
+};
+
 const FORMAT_LABELS: Record<SupportedUploadFormat, string> = {
   jpg: "JPG",
   png: "PNG",
@@ -93,6 +103,10 @@ const FORMAT_LABELS: Record<SupportedUploadFormat, string> = {
   mp3: "MP3",
   wav: "WAV",
 };
+
+export const ACCEPTED_FILE_TYPES = SUPPORTED_UPLOAD_FORMATS
+  .flatMap((format) => FORMAT_ALIASES[format].extensions)
+  .join(",");
 
 export function getClientUploadFormat({
   mimeType,
@@ -126,8 +140,5 @@ export function getAllowedFormatOptions(format: SupportedUploadFormat | null): F
 
 export function getFormatCategory(format: SupportedUploadFormat | null): FileCategory {
   if (!format) return "unknown";
-  if (["jpg", "png", "webp", "gif"].includes(format)) return "image";
-  if (["pdf", "txt"].includes(format)) return "document";
-  if (["mp3", "wav"].includes(format)) return "audio";
-  return "unknown";
+  return CATEGORY_BY_FORMAT[format];
 }

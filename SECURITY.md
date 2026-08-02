@@ -22,12 +22,15 @@ Convault currently includes:
 
 - Server-side upload validation with byte signature checks.
 - Single-file upload form validation.
+- Malformed multipart upload handling as client errors.
+- Upload filename normalization and reserved-name fallback.
 - Upload size limits.
 - Upload API rate limiting with optional Redis REST storage.
 - Redis REST config requires HTTPS and falls back safely when unset or invalid.
 - Bearer-token-protected conversion jobs.
 - No query-string job tokens.
 - No-store API headers for upload and job responses.
+- Single-use download results with server-side buffer cleanup.
 - In-memory job expiry, eviction, and buffer cleanup.
 - Download filename header escaping.
 - Global security headers in `next.config.ts`.

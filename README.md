@@ -8,10 +8,12 @@ Current phase: **Phase 1 - core converter and security hardening**.
 
 - Upload one file at a time.
 - Validate file type using server-side byte checks.
+- Normalize uploaded filenames before storing or displaying them.
 - Convert supported same-format files for download.
 - Convert TXT to a simple PDF.
 - Protect conversion jobs with bearer tokens.
 - Delete temporary server jobs after download, reset, failure, expiry, or eviction.
+- Consume converted results server-side when the download endpoint returns them.
 - Rate-limit upload validation with an in-memory fallback and optional Redis REST store.
 - Support light and dark mode.
 

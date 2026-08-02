@@ -3,6 +3,7 @@ import {
   OUTPUTS_BY_FORMAT,
   type SupportedUploadFormat,
 } from "@/lib/conversion-capabilities";
+import { sanitizeUploadFilename } from "@/lib/filename-sanitization";
 
 export { MAX_UPLOAD_BYTES, type SupportedUploadFormat } from "@/lib/conversion-capabilities";
 
@@ -13,14 +14,7 @@ export type UploadValidationResult = {
 };
 
 export function sanitizeDisplayFilename(name: string) {
-  return (
-    name
-      .normalize("NFKC")
-      .replace(/[\\/:*?"<>|\u0000-\u001f\u007f]+/g, "-")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 120) || "upload"
-  );
+  return sanitizeUploadFilename(name);
 }
 
 export function validateUploadBytes(bytes: Uint8Array): UploadValidationResult | null {

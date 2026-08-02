@@ -54,19 +54,21 @@ export function SiteFooter() {
           <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-zinc-300">
             Subscribe to get the latest updates and features.
           </p>
-          <form className="mt-4 flex gap-2" action="#">
+          <div className="mt-4 flex gap-2" aria-disabled="true">
             <input
               type="email"
               placeholder="Enter your email"
+              disabled
               className="min-w-0 flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--brand)] focus:ring-2 focus:ring-purple-500/20"
             />
             <button
-              type="submit"
-              className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-hover)]"
+              type="button"
+              disabled
+              className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white opacity-60"
             >
-              Subscribe
+              Planned
             </button>
-          </form>
+          </div>
         </div>
       </div>
 
