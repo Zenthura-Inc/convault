@@ -24,6 +24,7 @@ Convault currently includes:
 - Single-file upload form validation.
 - Upload size limits.
 - Upload API rate limiting with optional Redis REST storage.
+- Redis REST config requires HTTPS and falls back safely when unset or invalid.
 - Bearer-token-protected conversion jobs.
 - No query-string job tokens.
 - No-store API headers for upload and job responses.
@@ -36,7 +37,7 @@ Convault currently includes:
 
 - Conversion jobs are stored in memory and are not durable.
 - Conversion support is intentionally limited.
-- Redis rate limiting is optional; local development uses an in-memory fallback.
+- Redis rate limiting is optional; local development uses a bounded in-memory fallback.
 - Broader automated security tests are planned for Phase 2.
 
 Run before committing or deploying:

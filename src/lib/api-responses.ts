@@ -1,4 +1,4 @@
-import { NO_STORE_HEADERS } from "@/lib/http-headers";
+import { API_SECURITY_HEADERS } from "@/lib/http-headers";
 
 type JsonApiResponseOptions = {
   status?: number;
@@ -30,7 +30,7 @@ export function jsonApiResponse(
   return Response.json(body, {
     status: options.status,
     headers: {
-      ...NO_STORE_HEADERS,
+      ...API_SECURITY_HEADERS,
       ...options.headers,
     },
   });

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import type { JobRouteContext } from "@/lib/job-route-security";
 
 import { getAuthorizedConversionResult } from "@/lib/conversion-jobs";
-import { NO_STORE_HEADERS } from "@/lib/http-headers";
+import { API_SECURITY_HEADERS } from "@/lib/http-headers";
 import {
   getAuthorizedJobRouteParams,
   jobNotFound,
@@ -27,11 +27,10 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
 
   return new Response(body, {
     headers: {
-      ...NO_STORE_HEADERS,
+      ...API_SECURITY_HEADERS,
       "Content-Type": result.mimeType,
       "Content-Length": String(result.bytes.byteLength),
       "Content-Disposition": contentDispositionAttachment(result.filename),
-      "X-Content-Type-Options": "nosniff",
       "X-Download-Options": "noopen",
     },
   });

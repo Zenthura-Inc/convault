@@ -143,20 +143,30 @@ async function checkRedisRestRateLimit({
   const windowSeconds = Math.max(1, Math.ceil(windowMs / 1000));
 
   try {
-    const increment = await redisCommand<number>(redisUrl, redisToken, [
+    const increment = await redisCommand(redisUrl, redisToken, [
       "INCR",
       safeKey,
     ]);
+    if (!isFiniteNumber(increment)) {
+      throw new Error("Redis rate limit increment was invalid.");
+    }
 
     if (increment === 1) {
-      await redisCommand<string>(redisUrl, redisToken, [
+      const expires = await redisCommand(redisUrl, redisToken, [
         "EXPIRE",
         safeKey,
         String(windowSeconds),
       ]);
+      if (!isRedisSuccess(expires)) {
+        throw new Error("Redis rate limit expiry was invalid.");
+      }
     }
 
-    const ttl = await redisCommand<number>(redisUrl, redisToken, ["TTL", safeKey]);
+    const ttl = await redisCommand(redisUrl, redisToken, ["TTL", safeKey]);
+    if (!isFiniteNumber(ttl)) {
+      throw new Error("Redis rate limit TTL was invalid.");
+    }
+
     const retryAfter = ttl > 0 ? ttl : windowSeconds;
     const resetAt = Date.now() + retryAfter * 1000;
 
@@ -181,11 +191,11 @@ async function checkRedisRestRateLimit({
   }
 }
 
-async function redisCommand<T>(
+async function redisCommand(
   redisUrl: string,
   redisToken: string,
   command: string[],
-): Promise<T> {
+): Promise<unknown> {
   const response = await fetch(redisUrl, {
     method: "POST",
     headers: {
@@ -201,10 +211,25 @@ async function redisCommand<T>(
     throw new Error("Redis rate limit command failed.");
   }
 
-  const payload = (await response.json()) as { result?: T; error?: string };
-  if (payload.error || payload.result === undefined) {
+  const payload: unknown = await response.json();
+  if (!isRedisRestPayload(payload) || payload.error || payload.result === undefined) {
     throw new Error("Redis rate limit command returned an error.");
   }
 
   return payload.result;
+}
+
+function isRedisRestPayload(value: unknown): value is {
+  result?: unknown;
+  error?: unknown;
+} {
+  return typeof value === "object" && value !== null;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isRedisSuccess(value: unknown) {
+  return value === 1 || value === "OK";
 }
