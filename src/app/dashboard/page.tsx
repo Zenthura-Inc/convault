@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Dashboard - Convault",
+  description: "Convault dashboard placeholder for future conversion history and account features.",
+};
 
 export default function DashboardPage() {
   return (
@@ -21,7 +27,7 @@ export default function DashboardPage() {
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/"
+            href="/#converter"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
           >
             Convert a file

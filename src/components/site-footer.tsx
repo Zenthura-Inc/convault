@@ -2,18 +2,50 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 
-const footerGroups = [
+type FooterLink =
+  | {
+      label: string;
+      href: string;
+      planned?: never;
+    }
+  | {
+      label: string;
+      planned: true;
+      href?: never;
+    };
+
+type FooterGroup = {
+  title: string;
+  links: FooterLink[];
+};
+
+const footerGroups: FooterGroup[] = [
   {
     title: "Converters",
-    links: ["TXT to PDF", "PDF tools", "Image tools", "All converters"],
+    links: [
+      { label: "TXT to PDF", href: "/#converter" },
+      { label: "PDF tools", href: "/#converter" },
+      { label: "Image tools", href: "/#converter" },
+      { label: "All converters", href: "/#converter" },
+    ],
   },
   {
     title: "Company",
-    links: ["About Us", "Privacy Policy", "Terms of Use", "Contact Us"],
+    links: [
+      { label: "Pricing", href: "/pricing" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Use", planned: true },
+      { label: "Contact Us", planned: true },
+    ],
   },
   {
     title: "Support",
-    links: ["FAQ", "How It Works", "Blog", "Help Center"],
+    links: [
+      { label: "How It Works", href: "/#how-it-works" },
+      { label: "FAQ", planned: true },
+      { label: "Blog", planned: true },
+      { label: "Help Center", planned: true },
+    ],
   },
 ];
 
@@ -35,13 +67,22 @@ export function SiteFooter() {
             </h2>
             <div className="mt-4 space-y-3">
               {group.links.map((link) => (
-                <Link
-                  key={link}
-                  href={link === "Privacy Policy" ? "/privacy" : "/#converter"}
-                  className="block text-sm text-slate-600 transition hover:text-[var(--brand)] dark:text-zinc-300"
-                >
-                  {link}
-                </Link>
+                link.planned ? (
+                  <span
+                    key={link.label}
+                    className="block text-sm text-slate-400 dark:text-zinc-500"
+                  >
+                    {link.label}
+                  </span>
+                ) : (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="block text-sm text-slate-600 transition hover:text-[var(--brand)] dark:text-zinc-300"
+                  >
+                    {link.label}
+                  </Link>
+                )
               ))}
             </div>
           </div>

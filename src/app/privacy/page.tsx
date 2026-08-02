@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "Privacy & File Security - Convault",
+  description: "Learn how Convault handles temporary files, secure access, and data minimization.",
+};
 
 export default function PrivacyPage() {
   return (
@@ -14,18 +20,20 @@ export default function PrivacyPage() {
 
       <section className="grid gap-4 md:grid-cols-2">
         <PrivacyCard title="Temporary files">
-          Uploaded and converted files are intended to be stored temporarily. We
-          automatically delete files after a short period to reduce privacy risk.
+          Uploaded and converted files are held temporarily in memory during
+          Phase 1. Jobs expire automatically, and converted results are cleared
+          when the download endpoint returns them.
         </PrivacyCard>
 
         <PrivacyCard title="Secure access">
-          Downloads will use time-limited links. In future phases, logged-in
-          users can view their conversion history.
+          Conversion jobs are protected with bearer tokens. Job tokens are sent
+          in request headers, not query strings, so they are less likely to leak
+          through URLs or browser history.
         </PrivacyCard>
 
         <PrivacyCard title="Data minimization">
-          We aim to store only what&apos;s necessary to provide the service: file
-          metadata, conversion status, and temporary storage paths.
+          We store only what is needed for the active conversion job: basic file
+          metadata, conversion status, temporary bytes, and cleanup timing.
         </PrivacyCard>
 
         <PrivacyCard title="No payments yet">

@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pricing - Convault",
+  description: "Convault is currently free while premium conversion features are planned.",
+};
+
 export default function PricingPage() {
   return (
     <div className="space-y-10">
@@ -33,12 +41,12 @@ export default function PricingPage() {
             <p>Privacy-first temporary files</p>
           </div>
           <div className="mt-6">
-            <button
-              type="button"
+            <Link
+              href="/#converter"
               className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[var(--brand)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)] active:scale-[0.98]"
             >
               Get Started
-            </button>
+            </Link>
           </div>
         </div>
 
