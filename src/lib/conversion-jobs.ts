@@ -14,7 +14,7 @@ export type ConversionJob = {
   filename: string;
   bytes: number;
   inputFormat: SupportedUploadFormat;
-  outputFormat: string;
+  outputFormat: SupportedUploadFormat;
   mimeType: string;
   sourceBytes: Uint8Array;
   resultBytes?: Uint8Array;
@@ -29,7 +29,7 @@ type CreateConversionJobInput = {
   filename: string;
   bytes: number;
   inputFormat: SupportedUploadFormat;
-  outputFormat: string;
+  outputFormat: SupportedUploadFormat;
   mimeType: string;
   sourceBytes: Uint8Array;
   ttlMs?: number;
@@ -38,6 +38,7 @@ type CreateConversionJobInput = {
 const DEFAULT_JOB_TTL_MS = 15 * 60 * 1000;
 const MAX_IN_MEMORY_JOBS = 100;
 const MAX_IN_MEMORY_BYTES = MAX_UPLOAD_BYTES * 10;
+const MAX_TEXT_TO_PDF_BYTES = 256 * 1024;
 const jobs = new Map<string, ConversionJob>();
 
 export function createConversionJob({
@@ -133,6 +134,21 @@ export function getAuthorizedConversionResult(id: string, token: string) {
   };
 }
 
+export function consumeAuthorizedConversionResult(id: string, token: string) {
+  const result = getAuthorizedConversionResult(id, token);
+  if (!result) {
+    return null;
+  }
+
+  const job = jobs.get(id);
+  if (job) {
+    disposeJob(job);
+    jobs.delete(id);
+  }
+
+  return result;
+}
+
 export function deleteAuthorizedConversionJob(id: string, token: string) {
   cleanupExpiredJobs();
 
@@ -175,7 +191,9 @@ function convertJob(job: ConversionJob) {
   }
 
   if (job.inputFormat === "txt" && job.outputFormat === "pdf") {
-    const text = new TextDecoder("utf-8", { fatal: false }).decode(job.sourceBytes);
+    const text = new TextDecoder("utf-8", { fatal: false }).decode(
+      job.sourceBytes.subarray(0, MAX_TEXT_TO_PDF_BYTES),
+    );
     return {
       bytes: createSimplePdf(text),
       filename: `${outputBaseName}.pdf`,
@@ -197,7 +215,7 @@ function getBaseName(filename: string) {
 }
 
 function createSimplePdf(text: string) {
-  const lines = text
+  const lines = normalizePdfText(text)
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .split("\n")
@@ -254,6 +272,12 @@ function wrapPdfLine(line: string, width: number) {
 
 function escapePdfText(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+function normalizePdfText(value: string) {
+  return value
+    .replace(/\t/g, "    ")
+    .replace(/[^\n\r\x20-\x7e]/g, "?");
 }
 
 function byteLength(value: string) {

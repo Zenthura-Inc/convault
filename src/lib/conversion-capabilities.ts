@@ -42,6 +42,47 @@ export const MIME_BY_FORMAT: Record<SupportedUploadFormat, string> = {
   wav: "audio/wav",
 };
 
+const FORMAT_ALIASES = {
+  jpg: {
+    mimeTypes: ["image/jpeg"],
+    extensions: [".jpg", ".jpeg"],
+  },
+  png: {
+    mimeTypes: ["image/png"],
+    extensions: [".png"],
+  },
+  webp: {
+    mimeTypes: ["image/webp"],
+    extensions: [".webp"],
+  },
+  gif: {
+    mimeTypes: ["image/gif"],
+    extensions: [".gif"],
+  },
+  pdf: {
+    mimeTypes: ["application/pdf"],
+    extensions: [".pdf"],
+  },
+  txt: {
+    mimeTypes: ["text/plain"],
+    extensions: [".txt"],
+  },
+  mp3: {
+    mimeTypes: ["audio/mpeg", "audio/mp3"],
+    extensions: [".mp3"],
+  },
+  wav: {
+    mimeTypes: ["audio/wav", "audio/x-wav"],
+    extensions: [".wav"],
+  },
+} satisfies Record<
+  SupportedUploadFormat,
+  {
+    mimeTypes: readonly string[];
+    extensions: readonly string[];
+  }
+>;
+
 const FORMAT_LABELS: Record<SupportedUploadFormat, string> = {
   jpg: "JPG",
   png: "PNG",
@@ -52,6 +93,25 @@ const FORMAT_LABELS: Record<SupportedUploadFormat, string> = {
   mp3: "MP3",
   wav: "WAV",
 };
+
+export function getClientUploadFormat({
+  mimeType,
+  filename,
+}: {
+  mimeType: string;
+  filename: string;
+}): SupportedUploadFormat | null {
+  const normalizedMimeType = mimeType.trim().toLowerCase();
+  const normalizedFilename = filename.trim().toLowerCase();
+
+  for (const format of SUPPORTED_UPLOAD_FORMATS) {
+    const aliases = FORMAT_ALIASES[format];
+    if (aliases.mimeTypes.includes(normalizedMimeType)) return format;
+    if (aliases.extensions.some((extension) => normalizedFilename.endsWith(extension))) return format;
+  }
+
+  return null;
+}
 
 export function getAllowedOutputFormats(format: SupportedUploadFormat | null) {
   return format ? OUTPUTS_BY_FORMAT[format] : [];

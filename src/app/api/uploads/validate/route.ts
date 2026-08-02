@@ -12,6 +12,7 @@ import { requireSameOriginRequest } from "@/lib/request-origin";
 import {
   MAX_UPLOAD_BYTES,
   sanitizeDisplayFilename,
+  type SupportedUploadFormat,
   validateUploadBytes,
 } from "@/lib/upload-validation";
 
@@ -88,7 +89,11 @@ export async function POST(request: NextRequest) {
       return rateLimitedError(413, "file_too_large", "File is too large for the free converter.");
     }
 
-    const form = await request.formData();
+    const form = await readUploadForm(request);
+    if (!form) {
+      return rateLimitedError(400, "invalid_form", "Upload form data is invalid.");
+    }
+
     const files = form.getAll("file");
     const outputFormats = form.getAll("outputFormat");
 
@@ -126,8 +131,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const outputFormat = outputFormatValue.trim().toLowerCase();
-    if (!validation.allowedOutputs.some((allowedOutput) => allowedOutput === outputFormat)) {
+    const outputFormat = getAllowedOutputFormat(outputFormatValue, validation.allowedOutputs);
+    if (!outputFormat) {
       return rateLimitedError(400, "unsupported_output", "Selected output format is not supported for this file.");
     }
 
@@ -162,6 +167,22 @@ function getClientKey(request: NextRequest) {
   const realIp = getValidIpAddress(request.headers.get("x-real-ip")?.trim());
 
   return forwardedFor || realIp || "anonymous";
+}
+
+async function readUploadForm(request: NextRequest) {
+  try {
+    return await request.formData();
+  } catch {
+    return null;
+  }
+}
+
+function getAllowedOutputFormat(
+  value: string,
+  allowedOutputs: readonly SupportedUploadFormat[],
+) {
+  const normalizedValue = value.trim().toLowerCase();
+  return allowedOutputs.find((allowedOutput) => allowedOutput === normalizedValue) ?? null;
 }
 
 function isValidIpAddress(value: string | undefined) {

@@ -5,6 +5,7 @@ import * as React from "react";
 import {
   ACCEPTED_FILE_TYPES,
   getAllowedFormatOptions,
+  getClientUploadFormat,
   getFormatCategory,
   MAX_UPLOAD_BYTES,
   type FileCategory,
@@ -32,19 +33,10 @@ function formatBytes(bytes: number) {
 }
 
 function getClientInputFormat(file: File): SupportedUploadFormat | null {
-  const mime = file.type.toLowerCase();
-  const name = file.name.toLowerCase();
-
-  if (mime === "image/jpeg" || name.endsWith(".jpg") || name.endsWith(".jpeg")) return "jpg";
-  if (mime === "image/png" || name.endsWith(".png")) return "png";
-  if (mime === "image/webp" || name.endsWith(".webp")) return "webp";
-  if (mime === "image/gif" || name.endsWith(".gif")) return "gif";
-  if (mime === "application/pdf" || name.endsWith(".pdf")) return "pdf";
-  if (mime === "text/plain" || name.endsWith(".txt")) return "txt";
-  if (mime === "audio/mpeg" || mime === "audio/mp3" || name.endsWith(".mp3")) return "mp3";
-  if (mime === "audio/wav" || mime === "audio/x-wav" || name.endsWith(".wav")) return "wav";
-
-  return null;
+  return getClientUploadFormat({
+    mimeType: file.type,
+    filename: file.name,
+  });
 }
 
 function isAllowedFile(file: File) {
@@ -90,7 +82,7 @@ export function ConverterCard() {
   function deleteActiveJob(job = activeJob) {
     if (!job) return;
 
-    setActiveJob((current) => (current?.id === job.id ? null : current));
+    clearActiveJob(job);
 
     void fetch(`/api/jobs/${encodeURIComponent(job.id)}`, {
       method: "DELETE",
@@ -100,6 +92,12 @@ export function ConverterCard() {
       cache: "no-store",
       keepalive: true,
     }).catch(() => undefined);
+  }
+
+  function clearActiveJob(job = activeJob) {
+    if (!job) return;
+
+    setActiveJob((current) => (current?.id === job.id ? null : current));
   }
 
   function resetAll(options: { preserveError?: boolean } = {}) {
@@ -332,7 +330,7 @@ export function ConverterCard() {
       anchor.click();
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-      deleteActiveJob(activeJob);
+      clearActiveJob(activeJob);
       setDownloadUrl("");
       setDownloadName("");
       setStep("downloaded");

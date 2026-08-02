@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import type { JobRouteContext } from "@/lib/job-route-security";
 
-import { getAuthorizedConversionResult } from "@/lib/conversion-jobs";
+import { consumeAuthorizedConversionResult } from "@/lib/conversion-jobs";
 import { API_SECURITY_HEADERS } from "@/lib/http-headers";
 import {
   getAuthorizedJobRouteParams,
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
     return resultNotFound();
   }
 
-  const result = getAuthorizedConversionResult(routeParams.id, routeParams.token);
+  const result = consumeAuthorizedConversionResult(routeParams.id, routeParams.token);
   if (!result) {
     return resultNotFound();
   }
