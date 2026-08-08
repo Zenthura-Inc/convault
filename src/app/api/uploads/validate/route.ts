@@ -6,6 +6,7 @@ import {
   createConversionJob,
   toPublicConversionJob,
 } from "@/lib/conversion-jobs";
+import { isSupportedUploadFormat } from "@/lib/conversion-capabilities";
 import { jsonApiError, jsonApiOk } from "@/lib/api-responses";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireSameOriginRequest } from "@/lib/request-origin";
@@ -21,6 +22,7 @@ export const runtime = "nodejs";
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
 const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
+const MAX_OUTPUT_FORMAT_LENGTH = 12;
 
 type ErrorCode =
   | "invalid_content_type"
@@ -112,6 +114,10 @@ export async function POST(request: NextRequest) {
       return rateLimitedError(400, "unsupported_output", "Selected output format is invalid.");
     }
 
+    if (outputFormatValue.length > MAX_OUTPUT_FORMAT_LENGTH) {
+      return rateLimitedError(400, "unsupported_output", "Selected output format is invalid.");
+    }
+
     if (file.size <= 0) {
       return rateLimitedError(400, "invalid_file", "Uploaded file is empty.");
     }
@@ -182,6 +188,10 @@ function getAllowedOutputFormat(
   allowedOutputs: readonly SupportedUploadFormat[],
 ) {
   const normalizedValue = value.trim().toLowerCase();
+  if (!isSupportedUploadFormat(normalizedValue)) {
+    return null;
+  }
+
   return allowedOutputs.find((allowedOutput) => allowedOutput === normalizedValue) ?? null;
 }
 

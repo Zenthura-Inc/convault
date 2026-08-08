@@ -1,4 +1,6 @@
 export const FALLBACK_UPLOAD_FILENAME = "upload";
+const MAX_RAW_FILENAME_LENGTH = 512;
+const MAX_SANITIZED_FILENAME_LENGTH = 120;
 
 const RESERVED_FILENAMES = new Set([
   "con",
@@ -27,12 +29,13 @@ const RESERVED_FILENAMES = new Set([
 
 export function sanitizeUploadFilename(name: string) {
   const sanitized = name
+    .slice(0, MAX_RAW_FILENAME_LENGTH)
     .normalize("NFKC")
     .replace(/[\\/:*?"<>|\u0000-\u001f\u007f]+/g, "-")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/^[.\s]+|[.\s]+$/g, "")
-    .slice(0, 120);
+    .slice(0, MAX_SANITIZED_FILENAME_LENGTH);
 
   if (!sanitized || isReservedFilename(sanitized)) {
     return FALLBACK_UPLOAD_FILENAME;

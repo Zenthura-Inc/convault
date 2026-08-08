@@ -31,6 +31,7 @@ export async function GET(request: NextRequest, context: JobRouteContext) {
       "Content-Type": result.mimeType,
       "Content-Length": String(result.bytes.byteLength),
       "Content-Disposition": contentDispositionAttachment(result.filename),
+      "Content-Security-Policy": "sandbox",
       "X-Download-Options": "noopen",
     },
   });
