@@ -55,14 +55,16 @@ Leave these unset locally. When unset, Convault uses a bounded in-memory limiter
 
 `SITE_URL` controls canonical metadata, `robots.txt`, and `sitemap.xml`.
 It defaults to `https://convault.app` when unset. In production, set it to the
-public origin for the deployed site.
+HTTPS public origin for the deployed site. HTTP is accepted only for localhost
+development origins. Do not include paths, query strings, or credentials.
 
 For production, use an HTTPS Redis REST endpoint. Upstash Redis works well for this:
 
 - `RATE_LIMIT_REDIS_REST_URL` should be the HTTPS REST URL.
 - `RATE_LIMIT_REDIS_REST_TOKEN` should be the REST token.
 
-Invalid, empty, or non-HTTPS Redis config is ignored and Convault falls back to the in-memory limiter.
+Invalid, empty, non-HTTPS, or credential-bearing Redis config is ignored and
+Convault falls back to the in-memory limiter.
 
 ## Install
 

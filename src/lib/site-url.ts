@@ -10,7 +10,21 @@ export function getSiteUrl() {
   try {
     const parsedUrl = new URL(configuredUrl);
 
-    if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+    const isLocalhost =
+      parsedUrl.hostname === "localhost" ||
+      parsedUrl.hostname === "127.0.0.1" ||
+      parsedUrl.hostname === "::1" ||
+      parsedUrl.hostname === "[::1]";
+
+    if (parsedUrl.username || parsedUrl.password) {
+      return DEFAULT_SITE_URL;
+    }
+
+    if (parsedUrl.pathname !== "/" || parsedUrl.search || parsedUrl.hash) {
+      return DEFAULT_SITE_URL;
+    }
+
+    if (parsedUrl.protocol !== "https:" && !(parsedUrl.protocol === "http:" && isLocalhost)) {
       return DEFAULT_SITE_URL;
     }
 

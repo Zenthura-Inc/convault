@@ -60,6 +60,9 @@ function getRedisRestConfig() {
     if (parsedUrl.protocol !== "https:") {
       return null;
     }
+    if (parsedUrl.username || parsedUrl.password) {
+      return null;
+    }
   } catch {
     return null;
   }
