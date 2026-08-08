@@ -32,7 +32,7 @@ Convault currently includes:
 - No-store, no-referrer, noindex, nosniff, and authorization-vary API headers for upload and job responses.
 - Single-use download results with server-side buffer cleanup.
 - In-memory job expiry, eviction, and buffer cleanup.
-- Download filename header escaping.
+- Download filename header escaping and sandboxed attachment responses.
 - Global security headers in `next.config.ts`.
 - Dependency audit checks through `npm run check`.
 

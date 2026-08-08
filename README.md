@@ -14,7 +14,10 @@ Current phase: **Phase 1 - core converter and security hardening**.
 - Protect conversion jobs with bearer tokens.
 - Delete temporary server jobs after download, reset, failure, expiry, or eviction.
 - Consume converted results server-side when the download endpoint returns them.
+- Send no-store, noindex, no-referrer, nosniff, and authorization-vary API headers.
+- Serve converted downloads as sandboxed attachment responses.
 - Rate-limit upload validation with an in-memory fallback and optional Redis REST store.
+- Generate canonical metadata, `robots.txt`, `sitemap.xml`, and a web app manifest.
 - Support light and dark mode.
 
 ## Supported Formats
@@ -122,8 +125,8 @@ Phase 1 can move to Phase 2 once these are true:
 
 Planned next phase work:
 
+- Start Phase 2 by adding automated tests around upload validation, job authorization, processing, and download cleanup.
 - Add a real conversion engine or external conversion provider.
 - Replace in-memory jobs with durable storage.
 - Add persistence for conversion metadata.
 - Add account/dashboard behavior if needed.
-- Add automated tests for upload, job auth, processing, and download flows.
