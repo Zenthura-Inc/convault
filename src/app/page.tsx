@@ -48,23 +48,30 @@ export default function Home() {
             clicks. Convault keeps the workflow simple, fast, and privacy-first.
           </p>
 
-          <div id="features" className="mt-10 grid max-w-2xl scroll-mt-28 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <section
+            id="features"
+            className="mt-10 grid max-w-2xl scroll-mt-28 gap-5 sm:grid-cols-2 xl:grid-cols-3"
+            aria-labelledby="features-heading"
+          >
+            <h2 id="features-heading" className="sr-only">
+              Convault benefits
+            </h2>
             {benefits.map((benefit) => (
               <div key={benefit.title} className="flex min-w-0 gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-purple-200 bg-[var(--brand-soft)] text-sm font-bold text-[var(--brand)] dark:border-purple-500/30">
                   {benefit.icon}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold text-[var(--brand)]">
+                  <h3 className="text-sm font-semibold text-[var(--brand)]">
                     {benefit.title}
-                  </h2>
+                  </h3>
                   <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-zinc-300">
                     {benefit.description}
                   </p>
                 </div>
               </div>
             ))}
-          </div>
+          </section>
         </div>
 
         <div id="converter" className="min-w-0 scroll-mt-28">

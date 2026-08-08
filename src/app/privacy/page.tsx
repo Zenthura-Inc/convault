@@ -4,6 +4,9 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   title: "Privacy & File Security - Convault",
   description: "Learn how Convault handles temporary files, secure access, and data minimization.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {
