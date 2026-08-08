@@ -7,6 +7,7 @@ import {
   getAllowedFormatOptions,
   getClientUploadFormat,
   getFormatCategory,
+  isSupportedUploadFormat,
   MAX_UPLOAD_BYTES,
   type FileCategory,
   type SupportedUploadFormat,
@@ -164,6 +165,12 @@ export function ConverterCard() {
     if (picked) applyFile(picked);
   }
 
+  function changeOutputFormat(value: string) {
+    if (isSupportedUploadFormat(value)) {
+      setOutputFormat(value);
+    }
+  }
+
   async function startConvert() {
     if (conversionInFlightRef.current || step === "converting") {
       return;
@@ -220,7 +227,10 @@ export function ConverterCard() {
         return;
       }
 
-      if (!validationPayload.job?.id || !validationPayload.token) {
+      if (
+        typeof validationPayload.job?.id !== "string" ||
+        typeof validationPayload.token !== "string"
+      ) {
         setStep("selected");
         setProgress(35);
         setError("Conversion job could not be created. Please try again.");
@@ -280,8 +290,13 @@ export function ConverterCard() {
       }
 
       setProgress(100);
+      const resultFilename =
+        typeof processPayload.job.resultFilename === "string"
+          ? processPayload.job.resultFilename
+          : `converted.${isSupportedUploadFormat(outputFormat) ? outputFormat : "txt"}`;
+
       setDownloadUrl(`/api/jobs/${encodeURIComponent(validationPayload.job.id)}/download`);
-      setDownloadName(processPayload.job.resultFilename ?? `converted.${outputFormat}`);
+      setDownloadName(sanitizeUploadFilename(resultFilename));
       setStep("ready");
     } catch {
       if (createdJob) {
@@ -481,7 +496,7 @@ export function ConverterCard() {
               <select
                 className="mt-2 h-11 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] px-3 text-sm font-semibold text-zinc-900 outline-none transition hover:border-[var(--border-strong)] focus:border-[var(--brand)] focus:ring-2 focus:ring-purple-500/20 dark:text-zinc-100"
                 value={outputFormat}
-                onChange={(event) => setOutputFormat(event.target.value)}
+                onChange={(event) => changeOutputFormat(event.target.value)}
                 disabled={isConverting || formats.length === 0}
               >
                 {formats.map((format) => (

@@ -29,7 +29,7 @@ Convault currently includes:
 - Redis REST config requires HTTPS and falls back safely when unset or invalid.
 - Bearer-token-protected conversion jobs.
 - No query-string job tokens.
-- No-store API headers for upload and job responses.
+- No-store, no-referrer, noindex, nosniff, and authorization-vary API headers for upload and job responses.
 - Single-use download results with server-side buffer cleanup.
 - In-memory job expiry, eviction, and buffer cleanup.
 - Download filename header escaping.

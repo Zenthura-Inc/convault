@@ -6,5 +6,8 @@ export const NO_STORE_HEADERS = {
 
 export const API_SECURITY_HEADERS = {
   ...NO_STORE_HEADERS,
+  Vary: "Authorization",
+  "Referrer-Policy": "no-referrer",
   "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex, nofollow, noarchive",
 } as const;

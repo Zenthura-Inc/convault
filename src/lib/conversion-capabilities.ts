@@ -108,6 +108,10 @@ export const ACCEPTED_FILE_TYPES = SUPPORTED_UPLOAD_FORMATS
   .flatMap((format) => FORMAT_ALIASES[format].extensions)
   .join(",");
 
+export function isSupportedUploadFormat(value: string): value is SupportedUploadFormat {
+  return SUPPORTED_UPLOAD_FORMATS.includes(value as SupportedUploadFormat);
+}
+
 export function getClientUploadFormat({
   mimeType,
   filename,

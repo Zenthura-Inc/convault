@@ -45,6 +45,7 @@ function contentDispositionAttachment(filename: string) {
     .normalize("NFKD")
     .replace(/[^\x20-\x7e]+/g, "_")
     .replace(/["\\\r\n]/g, "_")
+    .replace(/[^A-Za-z0-9._ -]/g, "_")
     .slice(0, 120) || "converted-file";
   const encoded = encodeURIComponent(filename).replace(/['()]/g, escapeContentDispositionChar);
 
