@@ -43,6 +43,15 @@ Convault currently includes:
 - Redis rate limiting is optional; local development uses a bounded in-memory fallback.
 - Broader automated security tests are planned for Phase 2.
 
+## Phase 1 Security Exit Checklist
+
+Before moving Phase 1 work into Phase 2 or deploying publicly:
+
+- Commit the current security hardening changes.
+- Run `npm run check` and confirm the audit reports `0 vulnerabilities`.
+- Configure production Redis REST rate limiting, or explicitly accept the temporary in-memory fallback for the target environment.
+- Treat the current in-memory jobs and limited conversion support as known Phase 1 scope.
+
 Run before committing or deploying:
 
 ```bash

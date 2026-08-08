@@ -93,12 +93,17 @@ export function SiteFooter() {
             Stay Updated
           </h2>
           <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-zinc-300">
-            Subscribe to get the latest updates and features.
+            Product updates signup is planned for a later phase.
           </p>
-          <div className="mt-4 flex gap-2" aria-disabled="true">
+          <div
+            className="mt-4 flex gap-2 opacity-75"
+            aria-disabled="true"
+            title="Newsletter signup is planned"
+          >
             <input
               type="email"
               placeholder="Enter your email"
+              aria-label="Email address for future updates"
               disabled
               className="min-w-0 flex-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--brand)] focus:ring-2 focus:ring-purple-500/20"
             />
@@ -107,7 +112,7 @@ export function SiteFooter() {
               disabled
               className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white opacity-60"
             >
-              Planned
+              Coming Soon
             </button>
           </div>
         </div>
@@ -116,11 +121,7 @@ export function SiteFooter() {
       <div className="border-t border-[var(--border-subtle)]">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-6 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-10 dark:text-zinc-400">
           <p>Copyright {new Date().getFullYear()} Convault. All rights reserved.</p>
-          <div className="flex gap-4">
-            <span aria-hidden="true">x</span>
-            <span aria-hidden="true">f</span>
-            <span aria-hidden="true">ig</span>
-          </div>
+          <p>Social links planned.</p>
         </div>
       </div>
     </footer>
