@@ -4,6 +4,10 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Dashboard - Convault",
   description: "Convault dashboard placeholder for future conversion history and account features.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function DashboardPage() {
@@ -14,15 +18,16 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <p className="max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
-          Sign in to view your conversion history and access your recently
-          converted files.
+          Dashboard access is planned for future accounts. Core file conversion
+          works without signing in today.
         </p>
       </section>
 
       <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface)] p-6 shadow-[var(--shadow-soft)]">
         <h2 className="text-base font-semibold">Your conversions</h2>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-          This will show your conversion history once authentication is added.
+          Conversion history will appear here once authentication and durable
+          storage are added.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">

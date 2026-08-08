@@ -106,6 +106,13 @@ npm run check    # Run lint, audit, and build
 
 ## Phase 2 Direction
 
+Phase 1 can move to Phase 2 once these are true:
+
+- The current security hardening changes are committed.
+- `npm run check` passes with `0 vulnerabilities`.
+- The deployed environment has production rate limiting configured or an accepted temporary fallback plan.
+- The Phase 1 limitations below are accepted as known scope rather than accidental gaps.
+
 Planned next phase work:
 
 - Add a real conversion engine or external conversion provider.
