@@ -422,6 +422,7 @@ export function ConverterCard() {
             accept={ACCEPTED_FILE_TYPES}
             className="sr-only"
             onChange={onPickFile}
+            aria-label="Choose a file to convert"
             aria-describedby="supported-file-types"
           />
 
@@ -442,7 +443,10 @@ export function ConverterCard() {
 
       <div aria-live="polite">
         {error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
+          <div
+            className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200"
+            role="alert"
+          >
             {error}
           </div>
         ) : null}
@@ -534,7 +538,10 @@ export function ConverterCard() {
           ) : null}
 
           {step === "ready" || step === "downloaded" ? (
-            <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-500/30 dark:bg-green-950/30 dark:text-green-100">
+            <div
+              className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-500/30 dark:bg-green-950/30 dark:text-green-100"
+              role="status"
+            >
               {step === "downloaded"
                 ? "Download started. Server copy cleared."
                 : "Conversion complete. Your download is ready."}

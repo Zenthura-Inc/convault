@@ -70,17 +70,19 @@ export default function PricingPage() {
           </div>
 
           <div className="mt-5 space-y-2 text-sm text-zinc-700 dark:text-zinc-200">
-            <p>Larger file upload limits</p>
-            <p>Priority processing</p>
-            <p>Batch conversions</p>
-            <p>Ad-free experience</p>
-            <p>Extended file availability and history</p>
+            <p>Planned larger file upload limits</p>
+            <p>Planned priority processing</p>
+            <p>Planned batch conversions</p>
+            <p>Planned ad-free experience</p>
+            <p>Planned extended file availability and history</p>
           </div>
 
           <div className="mt-6">
             <button
               type="button"
               disabled
+              aria-disabled="true"
+              aria-label="Premium is coming soon and is not available yet"
               className="inline-flex h-11 w-full cursor-not-allowed items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-5 text-sm font-semibold text-zinc-400"
             >
               Premium (Coming Soon)
