@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSiteUrl } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://convault.app"),
+  metadataBase: new URL(getSiteUrl()),
   title: "Convault - Fast File Converter",
   description: "A fast, simple, privacy-first file converter.",
   alternates: {
@@ -25,6 +26,28 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/icon-transparent.png",
+  },
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    title: "Convault - Fast File Converter",
+    description: "A fast, simple, privacy-first file converter.",
+    url: "/",
+    siteName: "Convault",
+    images: [
+      {
+        url: "/icon-transparent.png",
+        width: 512,
+        height: 512,
+        alt: "Convault",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Convault - Fast File Converter",
+    description: "A fast, simple, privacy-first file converter.",
+    images: ["/icon-transparent.png"],
   },
 };
 

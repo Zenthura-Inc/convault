@@ -46,11 +46,16 @@ Local development can run without environment variables.
 Optional production rate-limit store:
 
 ```env
+SITE_URL=
 RATE_LIMIT_REDIS_REST_URL=
 RATE_LIMIT_REDIS_REST_TOKEN=
 ```
 
 Leave these unset locally. When unset, Convault uses a bounded in-memory limiter.
+
+`SITE_URL` controls canonical metadata, `robots.txt`, and `sitemap.xml`.
+It defaults to `https://convault.app` when unset. In production, set it to the
+public origin for the deployed site.
 
 For production, use an HTTPS Redis REST endpoint. Upstash Redis works well for this:
 
